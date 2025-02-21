@@ -1,28 +1,64 @@
 import React, { useState, useEffect } from 'react';
 import { FaClock, FaMapMarkerAlt, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
 import './ReportsList.css';
+import { useAuth } from '../../context/AuthContext';
+import { useReports } from '../../context/ReportContext';
 
-const ReportsList = ({ reports, onReportClick, userRole }) => {
+// Agregar la función calculateAge
+const calculateAge = (birthDate) => {
+  const today = new Date();
+  const birth = new Date(birthDate);
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  
+  return age;
+};
+
+const ReportsList = ({ userLocation }) => {
+  const { reports, loading, fetchReports } = useReports();
+  const { userData } = useAuth();
   const [filteredReports, setFilteredReports] = useState([]);
-  const [filter, setFilter] = useState('Todos');
-  const [sortBy, setSortBy] = useState('Más recientes');
+  const [filter, setFilter] = useState('all');
+  const [sort, setSort] = useState('recent');
 
   useEffect(() => {
     if (!reports) return;
-    let filtered = [...reports];
+    
+    let filtered = reports.filter(report => {
+      const expirationDate = new Date(report.fecha_expiracion);
+      return expirationDate > new Date();
+    });
 
-    if (filter !== 'Todos') {
-      filtered = filtered.filter(report => report.tipo_nombre === filter);
+    if (filter !== 'all') {
+      filtered = filtered.filter(report => report.tipo_id === parseInt(filter));
     }
 
     filtered.sort((a, b) => {
       const dateA = new Date(a.fecha_creacion);
       const dateB = new Date(b.fecha_creacion);
-      return sortBy === 'Más recientes' ? dateB - dateA : dateA - dateB;
+      return sort === 'recent' ? dateB - dateA : dateA - dateB;
     });
 
     setFilteredReports(filtered);
-  }, [reports, filter, sortBy]);
+  }, [reports, filter, sort]);
+
+  const canCreateReports = () => {
+    if (!userData) return false;
+    if (userData.rol_id === 5) return false; // Usuario menor de 16 años
+    if (userData.rol_id === 1) {
+      const age = calculateAge(userData.fechaNacimiento);
+      return age >= 16;
+    }
+    return true; // Otros roles pueden crear reportes
+  };
+
+  const canVerifyReports = () => {
+    return userData && (userData.rol_id === 3 || userData.rol_id === 4);
+  };
 
   const handleConfirmReport = async (reportId) => {
     try {
@@ -38,10 +74,8 @@ const ReportsList = ({ reports, onReportClick, userRole }) => {
         throw new Error('Error al confirmar el reporte');
       }
 
-      // Actualizar la lista de reportes
-      if (onReportClick) {
-        onReportClick(reportId, 'confirm');
-      }
+      // Actualizar los reportes usando el contexto
+      await fetchReports();
     } catch (error) {
       console.error('Error:', error);
       alert('Error al confirmar el reporte');
@@ -62,9 +96,7 @@ const ReportsList = ({ reports, onReportClick, userRole }) => {
         throw new Error('Error al verificar el reporte');
       }
 
-      if (onReportClick) {
-        onReportClick(reportId, 'verify');
-      }
+      fetchReports();
     } catch (error) {
       console.error('Error:', error);
       alert('Error al verificar el reporte');
@@ -107,8 +139,8 @@ const ReportsList = ({ reports, onReportClick, userRole }) => {
           </select>
 
           <select 
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
             className="sort-select"
           >
             <option value="Más recientes">⌚ Más recientes</option>
@@ -118,7 +150,9 @@ const ReportsList = ({ reports, onReportClick, userRole }) => {
       </div>
 
       <div className="reports-container">
-        {filteredReports.length === 0 ? (
+        {loading ? (
+          <div className="loading">Cargando reportes...</div>
+        ) : filteredReports.length === 0 ? (
           <div className="no-reports">
             <p>No hay reportes activos</p>
           </div>
@@ -127,7 +161,6 @@ const ReportsList = ({ reports, onReportClick, userRole }) => {
             <div 
               key={report.id} 
               className={`report-item ${report.estado}`}
-              onClick={() => onReportClick && onReportClick(report)}
             >
               <div className="report-type">
                 {report.tipo_nombre}
@@ -149,7 +182,7 @@ const ReportsList = ({ reports, onReportClick, userRole }) => {
                 </div>
               </div>
               <div className="report-actions">
-                {userRole === 'usuario' && (
+                {canCreateReports() && (
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
@@ -161,7 +194,7 @@ const ReportsList = ({ reports, onReportClick, userRole }) => {
                     <FaCheck />
                   </button>
                 )}
-                {userRole === 'admin' && (
+                {canVerifyReports() && (
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();

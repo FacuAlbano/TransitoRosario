@@ -11,23 +11,26 @@ import Register from './pages/register/Register';
 import Login from './pages/login/Login';
 import User from './pages/user/User';
 import { AuthProvider } from './context/AuthContext';
+import { ReportProvider } from './context/ReportContext';
 
 const App = () => {
   return (
     <AuthProvider>
-      <div>
-        <Navbar />  {/* Usar el componente Navbar con la primera letra en mayúscula */}
-        <Routes>  {/* Usar Routes para definir las rutas */}
-          <Route path="/" element={<Home />} />  {/* Usar Home con la primera letra en mayúscula */}
-          <Route path="/buses" element={<Buses />} />  {/* Usar Buses con la primera letra en mayúscula */}
-          <Route path="/gallery" element={<Gallery />} />  {/* Usar Buses con la primera letra en mayúscula */} 
-          <Route path="/about" element={<About />} />  {/* Usar Buses con la primera letra en mayúscula */} 
-          <Route path="/register" element={<Register />} />  {/* Usar Buses con la primera letra en mayúscula */} 
-          <Route path="/login" element={<Login />} />  {/* Usar Buses con la primera letra en mayúscula */} 
-          <Route path="/user" element={<User />} />  {/* Usar Buses con la primera letra en mayúscula */} 
-        </Routes>
-        <Footer />  {/* Usar el componente Footer */}
-      </div>
+      <ReportProvider>
+        <div>
+          <Navbar />  {/* Usar el componente Navbar con la primera letra en mayúscula */}
+          <Routes>  {/* Usar Routes para definir las rutas */}
+            <Route path="/" element={<Home />} />  {/* Usar Home con la primera letra en mayúscula */}
+            <Route path="/buses" element={<Buses />} />  {/* Usar Buses con la primera letra en mayúscula */}
+            <Route path="/gallery" element={<Gallery />} />  {/* Usar Buses con la primera letra en mayúscula */} 
+            <Route path="/about" element={<About />} />  {/* Usar Buses con la primera letra en mayúscula */} 
+            <Route path="/register" element={<Register />} />  {/* Usar Buses con la primera letra en mayúscula */} 
+            <Route path="/login" element={<Login />} />  {/* Usar Buses con la primera letra en mayúscula */} 
+            <Route path="/user" element={<User />} />  {/* Usar Buses con la primera letra en mayúscula */} 
+          </Routes>
+          <Footer />  {/* Usar el componente Footer */}
+        </div>
+      </ReportProvider>
     </AuthProvider>
   );
 };

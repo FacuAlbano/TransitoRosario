@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { FaExclamationTriangle, FaMapMarkerAlt } from 'react-icons/fa';
 import './ReportCreator.css';
+import { useReports } from '../../context/ReportContext';
 
 const ReportCreator = ({ userLocation, onReportCreated }) => {
+  const { addReport, fetchReports } = useReports();
   const [reportData, setReportData] = useState({
     tipo: '',
     descripcion: ''
@@ -51,7 +53,7 @@ const ReportCreator = ({ userLocation, onReportCreated }) => {
         throw new Error(errorData.error || errorData.message || 'Error al crear el reporte');
       }
 
-      const data = await response.json();
+      const newReport = await response.json();
 
       setReportData({
         tipo: '',
@@ -59,8 +61,10 @@ const ReportCreator = ({ userLocation, onReportCreated }) => {
       });
 
       if (onReportCreated) {
-        onReportCreated(data);
+        onReportCreated(newReport);
       }
+
+      addReport(newReport);
 
       alert('Reporte creado exitosamente');
     } catch (error) {

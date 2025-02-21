@@ -8,6 +8,7 @@ import ReportsList from '../../components/ReportsList/ReportsList';
 import ReportCreator from '../../components/ReportCreator/ReportCreator';
 import NewsCarousel from '../../components/NewsCarousel/NewsCarousel';
 import FavoriteRoutes from '../../components/FavoriteRoutes/FavoriteRoutes';
+import { ReportProvider } from '../../context/ReportContext';
 import './Home.css';
 
 const Home = () => {
@@ -119,19 +120,11 @@ const Home = () => {
       </div>
       
       <div className="side-panel">
-        <ReportCreator
-          userLocation={userLocation}
-          onReportCreated={(report) => {
-            setActiveReports([...activeReports, report]);
-          }}
-        />
+        <ReportCreator />
         
         <NewsCarousel reports={activeReports} />
         
-        <ReportsList
-          reports={activeReports}
-          userLocation={userLocation}
-        />
+        <ReportsList />
         
         {userData && userData.rol_id !== 5 && (
           <FavoriteRoutes 
