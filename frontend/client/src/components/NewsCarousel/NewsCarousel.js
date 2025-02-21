@@ -132,7 +132,7 @@ const NewsCarousel = () => {
           <FaChevronLeft />
         </button>
 
-        <div className="report-slide">
+        <div className="report-slide" data-type={currentReport.tipo_id}>
           <div 
             className="report-type-indicator"
             style={{ backgroundColor: getReportTypeColor(currentReport.tipo_id) }}

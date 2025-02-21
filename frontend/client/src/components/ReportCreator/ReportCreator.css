@@ -1,15 +1,17 @@
 .report-creator {
   background: rgba(3, 233, 244, 0.05);
   border-radius: 10px;
-  padding: 20px;
+  padding: 15px;
   border: 1px solid rgba(3, 233, 244, 0.2);
-  margin-bottom: 20px;
+  margin-bottom: 15px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .report-creator h3 {
   color: #03e9f4;
-  margin-bottom: 15px;
-  font-size: 1.2em;
+  margin: 0 0 12px 0;
+  font-size: 1.1em;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -18,7 +20,7 @@
 .report-creator form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 12px;
 }
 
 .report-creator select {
@@ -26,16 +28,17 @@
   border: 1px solid rgba(3, 233, 244, 0.2);
   border-radius: 5px;
   color: white;
-  padding: 10px;
+  padding: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
   width: 100%;
+  font-size: 0.9em;
 }
 
 .report-creator select:focus {
   outline: none;
   border-color: #03e9f4;
-  box-shadow: 0 0 10px rgba(3, 233, 244, 0.2);
+  box-shadow: 0 0 5px rgba(3, 233, 244, 0.2);
 }
 
 .report-creator select option {
@@ -49,23 +52,27 @@
   border: 1px solid rgba(3, 233, 244, 0.2);
   border-radius: 5px;
   color: white;
-  padding: 10px;
-  min-height: 100px;
+  padding: 8px;
+  height: 60px;
+  min-height: 60px;
+  max-height: 150px;
   resize: vertical;
   transition: all 0.3s ease;
+  font-size: 0.9em;
+  line-height: 1.4;
 }
 
 .report-creator textarea:focus {
   outline: none;
   border-color: #03e9f4;
-  box-shadow: 0 0 10px rgba(3, 233, 244, 0.2);
+  box-shadow: 0 0 5px rgba(3, 233, 244, 0.2);
 }
 
 .create-report-btn {
   background: #03e9f4;
   color: white;
   border: none;
-  padding: 12px;
+  padding: 8px;
   border-radius: 5px;
   cursor: pointer;
   font-weight: 500;
@@ -74,12 +81,18 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  font-size: 0.9em;
 }
 
-.create-report-btn:hover {
+.create-report-btn:not(:disabled):hover {
   background: #02c4cd;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(3, 233, 244, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(3, 233, 244, 0.3);
+}
+
+.create-report-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .report-type-badge {
@@ -218,27 +231,29 @@
 }
 
 .location-info {
-  margin: 15px 0;
-  padding: 10px;
-  border-radius: 5px;
   background: rgba(255, 255, 255, 0.05);
+  padding: 8px;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 0.9em;
+  min-height: 36px;
+}
+
+.getting-location,
+.location-set {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .getting-location {
   color: #03e9f4;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .location-set {
   color: #00ff00;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .refresh-location {
@@ -246,8 +261,10 @@
   border: none;
   color: #03e9f4;
   cursor: pointer;
-  padding: 5px;
+  padding: 4px;
   transition: transform 0.3s ease;
+  display: flex;
+  align-items: center;
 }
 
 .refresh-location:hover {
@@ -258,17 +275,14 @@
   background: rgba(3, 233, 244, 0.1);
   border: 1px solid rgba(3, 233, 244, 0.3);
   color: #03e9f4;
-  padding: 8px 15px;
+  padding: 6px 12px;
   border-radius: 5px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 0.9em;
   transition: all 0.3s ease;
-}
-
-.get-location-btn:hover {
-  background: rgba(3, 233, 244, 0.2);
 }
 
 .spinning {
@@ -280,7 +294,19 @@
   to { transform: rotate(360deg); }
 }
 
-.create-report-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+/* Ajustes responsive */
+@media (max-width: 768px) {
+  .report-creator {
+    padding: 12px;
+  }
+
+  .report-creator h3 {
+    font-size: 1em;
+  }
+
+  .report-creator select,
+  .report-creator textarea,
+  .create-report-btn {
+    font-size: 0.85em;
+  }
 } 
