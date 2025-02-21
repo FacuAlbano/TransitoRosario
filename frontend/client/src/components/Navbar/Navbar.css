@@ -4,7 +4,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    background: linear-gradient(90deg, #2980b9, #8e44ad); /* Degradado fijo */
+    background: linear-gradient(120deg, #2980b9, #8e44ad); /* Degradado fijo */
     color: white;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Sombra para destacar */
 }
