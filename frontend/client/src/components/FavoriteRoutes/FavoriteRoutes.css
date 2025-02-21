@@ -1,15 +1,19 @@
 .favorite-routes {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(3, 233, 244, 0.05);
   backdrop-filter: blur(10px);
   border-radius: 10px;
   padding: 20px;
   height: 100%;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  border: 1px solid rgba(3, 233, 244, 0.2);
 }
 
 .favorite-routes-header {
   margin-bottom: 20px;
+  border-bottom: 1px solid rgba(3, 233, 244, 0.2);
+  padding-bottom: 15px;
 }
 
 .favorite-routes h3 {
@@ -19,6 +23,7 @@
   gap: 10px;
   margin-bottom: 15px;
   font-size: 1.2em;
+  font-weight: 500;
 }
 
 .search-box {
@@ -30,10 +35,17 @@
   width: 100%;
   padding: 10px 35px;
   background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(3, 233, 244, 0.2);
   border-radius: 5px;
   color: white;
   font-size: 0.9em;
+  transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #03e9f4;
+  box-shadow: 0 0 10px rgba(3, 233, 244, 0.2);
 }
 
 .search-icon {
@@ -42,6 +54,89 @@
   top: 50%;
   transform: translateY(-50%);
   color: #03e9f4;
+}
+
+.routes-list {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.route-item {
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.route-item:hover {
+  background: rgba(3, 233, 244, 0.1);
+  transform: translateX(5px);
+  border-color: rgba(3, 233, 244, 0.3);
+}
+
+.route-content {
+  flex: 1;
+  margin-right: 15px;
+}
+
+.route-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.route-endpoints {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.origin, .destination {
+  font-weight: 500;
+}
+
+.separator {
+  color: #03e9f4;
+  font-size: 1.1em;
+}
+
+.route-meta {
+  display: flex;
+  gap: 15px;
+  font-size: 0.9em;
+}
+
+.duration {
+  color: #03e9f4;
+  font-weight: 600;
+}
+
+.distance {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.delete-button:hover {
+  color: #ff4757;
+  background: rgba(255, 71, 87, 0.1);
+  transform: scale(1.1);
 }
 
 .no-routes {
@@ -62,39 +157,19 @@
   opacity: 0.7;
 }
 
-.loading-spinner {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Personalizar scrollbar */
+.routes-list::-webkit-scrollbar {
+  width: 6px;
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(3, 233, 244, 0.1);
-  border-top-color: #03e9f4;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+.routes-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.route-item {
-  padding: 8px;
-  border-radius: 5px;
-  background: rgba(255, 255, 255, 0.05);
-  margin-bottom: 8px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.route-item:hover {
-  background: rgba(3, 233, 244, 0.1);
+.routes-list::-webkit-scrollbar-thumb {
+  background: rgba(3, 233, 244, 0.3);
+  border-radius: 3px;
 }
 
 .favorite-routes-header {
@@ -125,23 +200,6 @@
   top: 50%;
   transform: translateY(-50%);
   color: rgba(255, 255, 255, 0.5);
-}
-
-.search-box input {
-  width: 100%;
-  padding: 8px 8px 8px 35px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 5px;
-  color: white;
-  font-size: 0.9em;
-  transition: all 0.3s ease;
-}
-
-.search-box input:focus {
-  outline: none;
-  border-color: #03e9f4;
-  box-shadow: 0 0 10px rgba(3, 233, 244, 0.3);
 }
 
 .search-box input::placeholder {
@@ -197,12 +255,6 @@
   gap: 8px;
 }
 
-.origin,
-.destination {
-  display: flex;
-  flex-direction: column;
-}
-
 .label {
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.8em;
@@ -211,29 +263,6 @@
 .value {
   color: white;
   font-size: 1em;
-}
-
-.route-meta {
-  margin-top: 10px;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.8em;
-}
-
-.delete-button {
-  background: none;
-  border: none;
-  color: #ff4444;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 5px;
-  transition: all 0.3s ease;
-  opacity: 0.6;
-}
-
-.delete-button:hover {
-  opacity: 1;
-  background: rgba(255, 68, 68, 0.1);
-  transform: scale(1.1);
 }
 
 .no-favorites {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaSearch, FaMapMarkerAlt, FaExchangeAlt, FaTimes, FaStar } from 'react-icons/fa';
+import { FaSearch, FaMapMarkerAlt, FaExchangeAlt, FaTimes, FaStar, FaRoute } from 'react-icons/fa';
 import './RouteSearch.css';
 
 const RouteSearch = ({ userLocation, onRouteSelect }) => {
@@ -9,6 +9,7 @@ const RouteSearch = ({ userLocation, onRouteSelect }) => {
   const destinationAutocomplete = useRef(null);
   const [routes, setRoutes] = useState([]);
   const [showRouteOptions, setShowRouteOptions] = useState(false);
+  const [selectedRoute, setSelectedRoute] = useState(null);
 
   useEffect(() => {
     if (!window.google) return;
@@ -49,7 +50,8 @@ const RouteSearch = ({ userLocation, onRouteSelect }) => {
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    setShowRouteOptions(false);
+    setShowRouteOptions(true);
+    setSelectedRoute(null);
     
     try {
       let originLoc, destLoc;
@@ -85,43 +87,76 @@ const RouteSearch = ({ userLocation, onRouteSelect }) => {
 
       if (originLoc && destLoc) {
         const directionsService = new window.google.maps.DirectionsService();
-        directionsService.route({
+        
+        // Solicitar múltiples rutas con diferentes configuraciones
+        const routeRequests = [
+          {
+            origin: originLoc,
+            destination: destLoc,
+            travelMode: window.google.maps.TravelMode.DRIVING,
+            provideRouteAlternatives: true,
+            optimizeWaypoints: false,
+            avoidHighways: false,
+            avoidTolls: false
+          },
+          {
+            origin: originLoc,
+            destination: destLoc,
+            travelMode: window.google.maps.TravelMode.DRIVING,
+            provideRouteAlternatives: true,
+            avoidHighways: true // Evitar autopistas
+          },
+          {
+            origin: originLoc,
+            destination: destLoc,
+            travelMode: window.google.maps.TravelMode.DRIVING,
+            provideRouteAlternatives: true,
+            avoidTolls: true // Evitar peajes
+          }
+        ];
+
+        const allRoutes = await Promise.all(
+          routeRequests.map(request => 
+            new Promise((resolve) => {
+              directionsService.route(request, (result, status) => {
+                if (status === 'OK') {
+                  resolve(result.routes);
+                } else {
+                  resolve([]);
+                }
+              });
+            })
+          )
+        );
+
+        // Combinar y filtrar rutas únicas
+        const uniqueRoutes = allRoutes
+          .flat()
+          .filter((route, index, self) => {
+            if (index === 0) return true;
+            const prevRoutes = self.slice(0, index);
+            return !prevRoutes.some(prevRoute => 
+              Math.abs(route.legs[0].distance.value - prevRoute.legs[0].distance.value) < 1000 &&
+              Math.abs(route.legs[0].duration.value - prevRoute.legs[0].duration.value) < 300
+            );
+          });
+
+        const routesWithInfo = uniqueRoutes.map((route, index) => ({
+          ...route,
+          duration: route.legs[0].duration.text,
+          distance: route.legs[0].distance.text,
+          via: getMainRoadName(route),
+          isSelected: index === 0,
+          characteristics: getRouteCharacteristics(route)
+        }));
+        
+        setRoutes(routesWithInfo);
+        setSelectedRoute(routesWithInfo[0]);
+        onRouteSelect({
           origin: originLoc,
           destination: destLoc,
-          travelMode: window.google.maps.TravelMode.DRIVING,
-          provideRouteAlternatives: true,
-          optimizeWaypoints: false,
-          avoidHighways: false,
-          avoidTolls: false
-        }, (result, status) => {
-          if (status === 'OK') {
-            const uniqueRoutes = result.routes.filter((route, index, self) => {
-              if (index === 0) return true;
-              const prevRoute = self[index - 1];
-              const distanceDiff = Math.abs(
-                route.legs[0].distance.value - prevRoute.legs[0].distance.value
-              );
-              return distanceDiff > 1000;
-            });
-
-            const routesWithInfo = uniqueRoutes.map((route, index) => ({
-              ...route,
-              duration: route.legs[0].duration.text,
-              distance: route.legs[0].distance.text,
-              via: getMainRoadName(route),
-              isSelected: index === 0
-            }));
-            
-            setRoutes(routesWithInfo);
-            setShowRouteOptions(true);
-            
-            onRouteSelect({
-              origin: originLoc,
-              destination: destLoc,
-              routes: routesWithInfo,
-              selectedRouteIndex: 0
-            });
-          }
+          routes: routesWithInfo,
+          selectedRouteIndex: 0
         });
       }
     } catch (error) {
@@ -130,15 +165,22 @@ const RouteSearch = ({ userLocation, onRouteSelect }) => {
   };
 
   const handleRouteSelect = (index) => {
+    const selectedRoute = routes[index];
+    
+    // Actualizar el estado de las rutas
     setRoutes(routes.map((route, i) => ({
       ...route,
       isSelected: i === index
     })));
+    
+    setSelectedRoute(selectedRoute);
+
+    // Pasar la ruta seleccionada al mapa
     onRouteSelect({
-      origin: routes[index].legs[0].start_location,
-      destination: routes[index].legs[0].end_location,
-      routes: routes,
-      selectedRouteIndex: index
+      origin: selectedRoute.legs[0].start_location,
+      destination: selectedRoute.legs[0].end_location,
+      routes: [selectedRoute], // Pasar la ruta completa
+      selectedRouteIndex: 0
     });
   };
 
@@ -259,6 +301,24 @@ const RouteSearch = ({ userLocation, onRouteSelect }) => {
     }
   };
 
+  const getRouteCharacteristics = (route) => {
+    const characteristics = [];
+    const distance = route.legs[0].distance.value;
+    const duration = route.legs[0].duration.value;
+    const steps = route.legs[0].steps;
+
+    if (steps.some(step => step.instructions.includes('autopista'))) {
+      characteristics.push('Usa autopista');
+    }
+    if (distance < 10000) {
+      characteristics.push('Ruta corta');
+    }
+    if (steps.length < 5) {
+      characteristics.push('Pocas vueltas');
+    }
+    return characteristics;
+  };
+
   return (
     <div className="route-search">
       <form onSubmit={handleSearch}>
@@ -314,7 +374,19 @@ const RouteSearch = ({ userLocation, onRouteSelect }) => {
 
       {showRouteOptions && routes.length > 0 && (
         <div className="route-options">
-          <h3>Rutas disponibles:</h3>
+          <div className="route-options-header">
+            <h3>
+              <FaRoute /> Rutas sugeridas
+            </h3>
+            <button 
+              className="minimize-button"
+              onClick={() => setShowRouteOptions(false)}
+              title="Minimizar"
+            >
+              <FaTimes />
+            </button>
+          </div>
+          
           {routes.map((route, index) => (
             <div
               key={index}
@@ -322,17 +394,43 @@ const RouteSearch = ({ userLocation, onRouteSelect }) => {
               onClick={() => handleRouteSelect(index)}
             >
               <div className="route-info">
-                <span className="route-duration">{route.duration}</span>
-                <span className="route-distance">{route.distance}</span>
+                <div className="route-main-info">
+                  <span className="route-duration">{route.duration}</span>
+                  <span className="route-distance">{route.distance}</span>
+                </div>
+                {route.via && (
+                  <span className="route-via">vía {route.via}</span>
+                )}
+                <div className="route-characteristics">
+                  {route.characteristics.map((char, i) => (
+                    <span key={i} className="characteristic-tag">{char}</span>
+                  ))}
+                </div>
               </div>
               <button
                 className="save-route-button"
                 onClick={(e) => handleSaveRoute(route, e)}
+                title="Guardar en favoritos"
               >
-                <FaStar /> Guardar
+                <FaStar />
               </button>
             </div>
           ))}
+        </div>
+      )}
+
+      {selectedRoute && !showRouteOptions && (
+        <div className="selected-route">
+          <div className="selected-route-info">
+            <span>{selectedRoute.duration}</span>
+            <span>{selectedRoute.distance}</span>
+          </div>
+          <button 
+            className="show-alternatives"
+            onClick={() => setShowRouteOptions(true)}
+          >
+            Ver alternativas
+          </button>
         </div>
       )}
     </div>

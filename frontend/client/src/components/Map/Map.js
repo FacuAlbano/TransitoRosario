@@ -106,12 +106,11 @@ const Map = ({ userLocation, selectedRoute, activeReports, onMapLoad }) => {
       window.currentDirectionsRenderer.setMap(null);
     }
 
-    const directionsService = new window.google.maps.DirectionsService();
     const directionsRenderer = new window.google.maps.DirectionsRenderer({
       map: mapInstance.current,
       suppressMarkers: false,
       polylineOptions: {
-        strokeColor: '#2196F3',
+        strokeColor: '#03e9f4', // Cambiado a tu color principal
         strokeWeight: 6,
         strokeOpacity: 0.8
       }
@@ -119,28 +118,53 @@ const Map = ({ userLocation, selectedRoute, activeReports, onMapLoad }) => {
 
     window.currentDirectionsRenderer = directionsRenderer;
 
-    directionsService.route({
-      origin: selectedRoute.origin,
-      destination: selectedRoute.destination,
-      travelMode: window.google.maps.TravelMode.DRIVING,
-      provideRouteAlternatives: true,
-      optimizeWaypoints: true
-    }, (response, status) => {
-      if (status === 'OK') {
-        directionsRenderer.setDirections(response);
-        
-        // Ajustar el zoom para ver toda la ruta
-        const bounds = new window.google.maps.LatLngBounds();
-        response.routes[0].legs.forEach(leg => {
-          leg.steps.forEach(step => {
-            step.path.forEach(point => {
-              bounds.extend(point);
+    // Si tenemos una ruta precomputada, la usamos directamente
+    if (selectedRoute.routes && selectedRoute.routes.length > 0) {
+      const response = {
+        routes: selectedRoute.routes,
+        request: {
+          origin: selectedRoute.origin,
+          destination: selectedRoute.destination,
+          travelMode: window.google.maps.TravelMode.DRIVING
+        }
+      };
+      directionsRenderer.setDirections(response);
+
+      // Ajustar el zoom para ver toda la ruta
+      const bounds = new window.google.maps.LatLngBounds();
+      selectedRoute.routes[0].legs.forEach(leg => {
+        bounds.extend(leg.start_location);
+        bounds.extend(leg.end_location);
+        leg.steps.forEach(step => {
+          bounds.extend(step.start_location);
+          bounds.extend(step.end_location);
+        });
+      });
+      mapInstance.current.fitBounds(bounds);
+    } else {
+      // Si no tenemos una ruta precomputada, calculamos una nueva
+      const directionsService = new window.google.maps.DirectionsService();
+      directionsService.route({
+        origin: selectedRoute.origin,
+        destination: selectedRoute.destination,
+        travelMode: window.google.maps.TravelMode.DRIVING
+      }, (response, status) => {
+        if (status === 'OK') {
+          directionsRenderer.setDirections(response);
+          
+          // Ajustar el zoom para ver toda la ruta
+          const bounds = new window.google.maps.LatLngBounds();
+          response.routes[0].legs.forEach(leg => {
+            leg.steps.forEach(step => {
+              step.path.forEach(point => {
+                bounds.extend(point);
+              });
             });
           });
-        });
-        mapInstance.current.fitBounds(bounds);
-      }
-    });
+          mapInstance.current.fitBounds(bounds);
+        }
+      });
+    }
   }, [selectedRoute]);
 
   return <div ref={mapRef} className="map-container" />;
