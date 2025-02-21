@@ -101,69 +101,44 @@ const Map = ({ userLocation, selectedRoute, activeReports, onMapLoad }) => {
   useEffect(() => {
     if (!window.google || !mapInstance.current || !selectedRoute) return;
 
-    // Limpiar rutas anteriores si existen
-    if (window.currentDirectionsRenderer) {
-      window.currentDirectionsRenderer.setMap(null);
-    }
-
-    const directionsRenderer = new window.google.maps.DirectionsRenderer({
-      map: mapInstance.current,
-      suppressMarkers: false,
-      polylineOptions: {
-        strokeColor: '#03e9f4', // Cambiado a tu color principal
-        strokeWeight: 6,
-        strokeOpacity: 0.8
+    try {
+      // Limpiar rutas anteriores
+      if (window.currentDirectionsRenderer) {
+        window.currentDirectionsRenderer.setMap(null);
       }
-    });
 
-    window.currentDirectionsRenderer = directionsRenderer;
+      const directionsRenderer = new window.google.maps.DirectionsRenderer({
+        map: mapInstance.current,
+        suppressMarkers: false,
+        polylineOptions: {
+          strokeColor: '#03e9f4',
+          strokeWeight: 6,
+          strokeOpacity: 0.8
+        }
+      });
 
-    // Si tenemos una ruta precomputada, la usamos directamente
-    if (selectedRoute.routes && selectedRoute.routes.length > 0) {
-      const response = {
+      window.currentDirectionsRenderer = directionsRenderer;
+
+      // Configurar la ruta en el renderer
+      directionsRenderer.setDirections({
         routes: selectedRoute.routes,
         request: {
           origin: selectedRoute.origin,
           destination: selectedRoute.destination,
           travelMode: window.google.maps.TravelMode.DRIVING
         }
-      };
-      directionsRenderer.setDirections(response);
+      });
 
       // Ajustar el zoom para ver toda la ruta
       const bounds = new window.google.maps.LatLngBounds();
-      selectedRoute.routes[0].legs.forEach(leg => {
-        bounds.extend(leg.start_location);
-        bounds.extend(leg.end_location);
-        leg.steps.forEach(step => {
-          bounds.extend(step.start_location);
-          bounds.extend(step.end_location);
-        });
+      selectedRoute.routes[0].legs[0].steps.forEach(step => {
+        bounds.extend(step.start_location);
+        bounds.extend(step.end_location);
       });
       mapInstance.current.fitBounds(bounds);
-    } else {
-      // Si no tenemos una ruta precomputada, calculamos una nueva
-      const directionsService = new window.google.maps.DirectionsService();
-      directionsService.route({
-        origin: selectedRoute.origin,
-        destination: selectedRoute.destination,
-        travelMode: window.google.maps.TravelMode.DRIVING
-      }, (response, status) => {
-        if (status === 'OK') {
-          directionsRenderer.setDirections(response);
-          
-          // Ajustar el zoom para ver toda la ruta
-          const bounds = new window.google.maps.LatLngBounds();
-          response.routes[0].legs.forEach(leg => {
-            leg.steps.forEach(step => {
-              step.path.forEach(point => {
-                bounds.extend(point);
-              });
-            });
-          });
-          mapInstance.current.fitBounds(bounds);
-        }
-      });
+
+    } catch (error) {
+      console.error('Error al mostrar la ruta:', error);
     }
   }, [selectedRoute]);
 

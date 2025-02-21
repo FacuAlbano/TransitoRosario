@@ -1,138 +1,152 @@
 .home-container {
-  min-height: calc(100vh - 60px);
-  padding: 15px;
-  background: linear-gradient(120deg, #2980b9, #8e44ad);
-}
-
-.main-content {
   display: flex;
+  height: calc(100vh - 60px);
+  padding: 15px;
   gap: 15px;
-  max-width: 1400px;
-  margin: 0 auto;
-  height: calc(100vh - 90px);
+  background: linear-gradient(120deg, #2980b9, #8e44ad);
+  overflow: hidden;
 }
 
 .map-section {
-  flex: 3;
+  flex: 2;
+  min-width: 0;
+  height: 100%;
+  border-radius: 15px;
+  overflow: hidden;
+  position: relative;
+}
+
+.side-panel {
+  flex: 1;
+  max-width: 380px;
+  min-width: 300px;
   display: flex;
   flex-direction: column;
   gap: 15px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+/* Ajustar tamaños consistentes para todos los componentes */
+.report-creator,
+.news-carousel,
+.reports-list,
+.favorite-routes {
+  flex-shrink: 0;
+  background: rgba(3, 233, 244, 0.05);
+  border: 1px solid rgba(3, 233, 244, 0.2);
+  border-radius: 10px;
   padding: 15px;
   backdrop-filter: blur(10px);
-  height: 100%;
+  min-height: 200px;
+  max-height: 250px;
 }
 
-.side-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  max-width: 350px;
-  height: 100%;
-}
-
-/* Ajustes para los componentes dentro de side-content */
-.report-creator {
-  background: rgba(255, 255, 255, 0.1);
+/* Ajustar el buscador de rutas */
+.route-search {
+  position: absolute;
+  top: 20px;
+  left: 20px; /* Cambiado de right a left */
+  transform: none;
+  width: 300px;
+  z-index: 1;
+  background: rgba(3, 233, 244, 0.1);
   backdrop-filter: blur(10px);
   border-radius: 10px;
   padding: 15px;
-  max-height: 30%;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
-.report-creator form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.report-creator select,
-.report-creator textarea {
+.route-search input,
+.route-search select {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(3, 233, 244, 0.2);
+  color: white;
+  width: 100%;
   padding: 8px;
-  font-size: 0.9em;
+  margin-bottom: 10px;
 }
 
-.report-creator textarea {
-  height: 60px;
-  resize: none;
+/* Ajustes específicos para cada componente */
+.news-carousel {
+  overflow: hidden;
 }
 
 .reports-list {
   flex: 1;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 10px;
-  padding: 15px;
-  max-height: 35%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.reports-container {
+  flex: 1;
   overflow-y: auto;
+  padding-right: 8px;
 }
 
 .favorite-routes {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 10px;
-  padding: 15px;
-  max-height: 35%;
   overflow-y: auto;
 }
 
-/* Ajustes para el mapa */
-.map-container {
-  flex: 1;
-  min-height: 0;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-/* Ajustes para el buscador de rutas */
-.route-search {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 12px;
-  border-radius: 10px;
-  min-height: 85px;
-}
-
 /* Scrollbars personalizados */
-.side-content *::-webkit-scrollbar {
+.side-panel::-webkit-scrollbar,
+.reports-container::-webkit-scrollbar,
+.favorite-routes::-webkit-scrollbar {
   width: 6px;
 }
 
-.side-content *::-webkit-scrollbar-track {
+.side-panel::-webkit-scrollbar-track,
+.reports-container::-webkit-scrollbar-track,
+.favorite-routes::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 3px;
 }
 
-.side-content *::-webkit-scrollbar-thumb {
-  background: rgba(3, 233, 244, 0.3);
+.side-panel::-webkit-scrollbar-thumb,
+.reports-container::-webkit-scrollbar-thumb,
+.favorite-routes::-webkit-scrollbar-thumb {
+  background: #03e9f4;
   border-radius: 3px;
-}
-
-.side-content *::-webkit-scrollbar-thumb:hover {
-  background: rgba(3, 233, 244, 0.5);
 }
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .main-content {
+  .home-container {
     flex-direction: column;
     height: auto;
-  }
-
-  .side-content {
-    max-width: 100%;
+    overflow: auto;
   }
 
   .map-section {
-    height: 500px;
+    height: 50vh;
+    min-height: 400px;
   }
 
-  .report-creator,
-  .reports-list,
-  .favorite-routes {
-    max-height: none;
+  .side-panel {
+    max-width: none;
+    min-width: 0;
+    height: auto;
+  }
+
+  .route-search {
+    position: relative;
+    top: 0;
+    right: 0;
+    width: 100%;
+    margin-bottom: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-container {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .map-section {
+    min-height: 300px;
   }
 }
 
@@ -140,8 +154,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 60px);
-  font-size: 1.5em;
+  height: 100%;
+  font-size: 1.2em;
   color: white;
 }
 
@@ -164,9 +178,9 @@
   overflow: hidden;
 }
 
-@media (max-width: 768px) {
-  .route-search {
-    width: 95%;
-    top: 10px;
-  }
+/* Asegurarse de que los componentes no se desborden */
+.reports-list,
+.favorite-routes {
+  max-height: calc(100vh - 500px); /* Ajusta según necesites */
+  overflow-y: auto;
 }

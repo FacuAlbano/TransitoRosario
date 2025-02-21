@@ -1,11 +1,12 @@
 .news-carousel {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(3, 233, 244, 0.05);
   backdrop-filter: blur(10px);
   border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(3, 233, 244, 0.2);
   position: relative;
   overflow: hidden;
+  margin-bottom: 20px;
 }
 
 .carousel-content {
@@ -50,14 +51,16 @@
 }
 
 .report-type-indicator {
-  position: absolute;
-  top: -10px;
-  left: 15px;
+  background: #ff4444;
+  color: white;
   padding: 5px 15px;
   border-radius: 15px;
-  color: white;
   font-size: 0.9em;
-  font-weight: bold;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 15px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 

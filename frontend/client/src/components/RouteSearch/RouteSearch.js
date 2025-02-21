@@ -320,21 +320,20 @@ const RouteSearch = ({ userLocation, onRouteSelect }) => {
   };
 
   return (
-    <div className="route-search">
-      <form onSubmit={handleSearch}>
-        <div className="search-inputs">
-          <div className="input-group">
-            <FaMapMarkerAlt className="icon origin-icon" />
-            <input
-              id="origin-input"
-              type="text"
-              value={origin}
-              onChange={(e) => setOrigin(e.target.value)}
-              placeholder="Origen"
-              autoComplete="off"
-            />
+    <form className="route-search" onSubmit={handleSearch}>
+      <div className="route-inputs">
+        <div className="input-group">
+          <FaMapMarkerAlt className="location-icon" />
+          <input
+            id="origin-input"
+            type="text"
+            placeholder="Origen"
+            value={origin}
+            onChange={(e) => setOrigin(e.target.value)}
+          />
+          <div className="action-buttons">
             {origin && (
-              <button type="button" className="clear-button" onClick={(e) => clearInput('origin')}>
+              <button type="button" className="clear-button" onClick={() => clearInput('origin')}>
                 <FaTimes />
               </button>
             )}
@@ -344,33 +343,33 @@ const RouteSearch = ({ userLocation, onRouteSelect }) => {
               </button>
             )}
           </div>
-
-          <button type="button" className="swap-button" onClick={swapLocations}>
-            <FaExchangeAlt />
-          </button>
-
-          <div className="input-group">
-            <FaMapMarkerAlt className="icon destination-icon" />
-            <input
-              id="destination-input"
-              type="text"
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
-              placeholder="Destino"
-              autoComplete="off"
-            />
-            {destination && (
-              <button type="button" className="clear-button" onClick={(e) => clearInput('destination')}>
-                <FaTimes />
-              </button>
-            )}
-          </div>
         </div>
 
+        <div className="input-group">
+          <FaMapMarkerAlt className="location-icon" />
+          <input
+            id="destination-input"
+            type="text"
+            placeholder="Destino"
+            value={destination}
+            onChange={(e) => setDestination(e.target.value)}
+          />
+          {destination && (
+            <button type="button" className="clear-button" onClick={() => clearInput('destination')}>
+              <FaTimes />
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="button-group">
+        <button type="button" className="swap-button" onClick={swapLocations}>
+          <FaExchangeAlt />
+        </button>
         <button type="submit" className="search-button">
           <FaSearch /> Buscar Ruta
         </button>
-      </form>
+      </div>
 
       {showRouteOptions && routes.length > 0 && (
         <div className="route-options">
@@ -433,7 +432,7 @@ const RouteSearch = ({ userLocation, onRouteSelect }) => {
           </button>
         </div>
       )}
-    </div>
+    </form>
   );
 };
 

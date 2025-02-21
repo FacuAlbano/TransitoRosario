@@ -103,44 +103,42 @@ const Home = () => {
 
   return (
     <div className="home-container">
-      <div className="main-content">
-        <div className="map-section">
-          <GoogleMapsLoader>
-            <Map
-              userLocation={userLocation}
-              selectedRoute={selectedRoute}
-              activeReports={activeReports}
-              onMapLoad={setMapInstance}
-            />
-            <RouteSearch
-              userLocation={userLocation}
-              onRouteSelect={handleRouteSelect}
-            />
-          </GoogleMapsLoader>
-        </div>
-        
-        <div className="side-content">
-          <NewsCarousel reports={activeReports} />
-          
-          {userData && userData.rol_id !== 5 && (
-            <ReportCreator
-              userLocation={userLocation}
-              onReportCreated={(report) => {
-                setActiveReports([...activeReports, report]);
-              }}
-            />
-          )}
-          
-          <ReportsList
-            reports={activeReports}
+      <div className="map-section">
+        <GoogleMapsLoader>
+          <Map
             userLocation={userLocation}
+            selectedRoute={selectedRoute}
+            activeReports={activeReports}
+            onMapLoad={setMapInstance}
           />
-          
+          <RouteSearch
+            userLocation={userLocation}
+            onRouteSelect={handleRouteSelect}
+          />
+        </GoogleMapsLoader>
+      </div>
+      
+      <div className="side-panel">
+        <ReportCreator
+          userLocation={userLocation}
+          onReportCreated={(report) => {
+            setActiveReports([...activeReports, report]);
+          }}
+        />
+        
+        <NewsCarousel reports={activeReports} />
+        
+        <ReportsList
+          reports={activeReports}
+          userLocation={userLocation}
+        />
+        
+        {userData && userData.rol_id !== 5 && (
           <FavoriteRoutes 
             userData={userData}
             onRouteSelect={setSelectedRoute}
           />
-        </div>
+        )}
       </div>
     </div>
   );

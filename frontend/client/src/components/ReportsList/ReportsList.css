@@ -1,5 +1,12 @@
 .reports-list {
-  width: 100%;
+  background: rgba(3, 233, 244, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 15px;
+  border: 1px solid rgba(3, 233, 244, 0.2);
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Importante para el scroll */
 }
 
 .reports-list h3 {
@@ -9,40 +16,40 @@
 }
 
 .report-item {
-  padding: 8px;
-  border-radius: 5px;
   background: rgba(255, 255, 255, 0.05);
-  margin-bottom: 8px;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 12px;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.report-item:hover {
+  background: rgba(3, 233, 244, 0.1);
+  border-color: rgba(3, 233, 244, 0.3);
+  transform: translateX(5px);
 }
 
 .report-item:last-child {
   margin-bottom: 0;
 }
 
-.reports-list {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
 .reports-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  padding: 8px 0;
+  margin-bottom: 10px;
 }
 
 .reports-header h3 {
   color: #03e9f4;
-  font-size: 1.2em;
+  font-size: 1em;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  margin: 0;
 }
 
 .reports-controls {
@@ -50,29 +57,37 @@
   gap: 10px;
 }
 
-.filter-select,
-.sort-select {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 5px;
-  color: white;
-  padding: 5px 10px;
-  font-size: 0.9em;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.reports-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
-.filter-select:focus,
-.sort-select:focus {
-  outline: none;
-  border-color: #03e9f4;
-  box-shadow: 0 0 10px rgba(3, 233, 244, 0.3);
+.filter-select,
+.sort-select {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(3, 233, 244, 0.2);
+  border-radius: 4px;
+  color: white;
+  padding: 4px 8px;
+  font-size: 0.85em;
+  cursor: pointer;
+  min-width: 100px;
+}
+
+.filter-select option,
+.sort-select option {
+  background: #2980b9;
+  color: white;
+  padding: 8px;
 }
 
 .reports-container {
+  flex: 1;
   overflow-y: auto;
-  flex-grow: 1;
-  padding-right: 10px;
+  padding-right: 8px;
+  margin-top: 10px;
 }
 
 .reports-container::-webkit-scrollbar {
@@ -125,18 +140,18 @@
 
 .report-time {
   color: rgba(255, 255, 255, 0.6);
-  font-size: 0.8em;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  font-size: 0.9em;
 }
 
 .report-content {
-  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .report-description {
-  margin: 10px 0;
+  color: white;
+  font-size: 1em;
   line-height: 1.4;
 }
 
@@ -149,7 +164,14 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
-.report-location,
+.report-location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95em;
+}
+
 .report-creator {
   display: flex;
   align-items: center;
@@ -184,6 +206,55 @@
 
 .report-card {
   animation: slideIn 0.3s ease-out;
+}
+
+.report-type {
+  font-size: 1.2em;
+  color: #03e9f4;
+  font-weight: 500;
+}
+
+.report-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9em;
+  margin-top: 8px;
+}
+
+.report-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.action-button {
+  background: rgba(3, 233, 244, 0.1);
+  border: 1px solid rgba(3, 233, 244, 0.3);
+  color: #03e9f4;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-button:hover {
+  background: rgba(3, 233, 244, 0.2);
+  transform: translateY(-2px);
+}
+
+.confirmations {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.8em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 @media (max-width: 768px) {

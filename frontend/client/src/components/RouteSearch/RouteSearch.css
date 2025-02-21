@@ -1,104 +1,67 @@
 .route-search {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 15px;
-  border-radius: 10px;
-}
-
-.route-search form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10px;
 }
 
-.search-inputs {
+.route-inputs {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .input-group {
-  flex: 1;
   position: relative;
   display: flex;
   align-items: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(3, 233, 244, 0.2);
+  border-radius: 5px;
+  padding: 8px 12px;
+}
+
+.input-group .location-icon {
+  color: #03e9f4;
+  font-size: 1.2em;
+}
+
+.input-group .action-buttons {
+  display: flex;
+  gap: 5px;
 }
 
 .input-group input {
-  width: 100%;
-  padding: 10px 35px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 5px;
+  flex: 1;
+  background: none;
+  border: none;
   color: white;
+  padding: 5px;
   font-size: 0.9em;
-  transition: all 0.3s ease;
-}
-
-.input-group input:focus {
-  outline: none;
-  border-color: #03e9f4;
-  box-shadow: 0 0 10px rgba(3, 233, 244, 0.2);
 }
 
 .input-group input::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
 
-.icon {
-  position: absolute;
-  left: 10px;
-  color: #03e9f4;
-  font-size: 1em;
-}
-
-.use-location,
-.clear-button {
-  position: absolute;
-  right: 8px;
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.5);
-  cursor: pointer;
-  padding: 4px;
-  transition: all 0.3s ease;
-}
-
-.use-location:hover,
-.clear-button:hover {
-  color: #03e9f4;
-}
-
-.swap-button {
-  padding: 8px;
-  background: rgba(3, 233, 244, 0.1);
-  border: none;
-  color: #03e9f4;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.swap-button:hover {
-  background: rgba(3, 233, 244, 0.2);
-  transform: rotate(180deg);
+.input-group input:focus {
+  outline: none;
 }
 
 .search-button {
-  width: 100%;
-  padding: 10px;
+  flex: 1;
   background: #03e9f4;
-  border: none;
-  border-radius: 5px;
   color: white;
-  font-size: 0.9em;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
   cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.3s ease;
 }
 
 .search-button:hover {
@@ -365,4 +328,49 @@
 .save-route-button:hover {
   background: rgba(3, 233, 244, 0.1);
   transform: scale(1.05);
+}
+
+/* Estilos para los botones de acción */
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.swap-button,
+.use-location,
+.clear-button {
+  background: rgba(3, 233, 244, 0.1);
+  border: 1px solid rgba(3, 233, 244, 0.3);
+  color: #03e9f4;
+  padding: 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swap-button {
+  width: 40px;
+  height: 40px;
+}
+
+.swap-button:hover {
+  background: rgba(3, 233, 244, 0.2);
+  transform: rotate(180deg);
+}
+
+.use-location,
+.clear-button {
+  padding: 6px;
+  background: none;
+  border: none;
+}
+
+.use-location:hover,
+.clear-button:hover {
+  color: #02c4cd;
+  transform: scale(1.1);
 } 

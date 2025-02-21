@@ -1,170 +1,183 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { FaMapMarkerAlt, FaClock, FaUser, FaExclamationCircle } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaClock, FaMapMarkerAlt, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
 import './ReportsList.css';
 
-const ReportsList = ({ reports, userLocation }) => {
+const ReportsList = ({ reports, onReportClick, userRole }) => {
   const [filteredReports, setFilteredReports] = useState([]);
-  const [filter, setFilter] = useState('all'); // all, nearby, route
-  const [sortBy, setSortBy] = useState('date'); // date, distance
+  const [filter, setFilter] = useState('Todos');
+  const [sortBy, setSortBy] = useState('Más recientes');
 
   useEffect(() => {
     if (!reports) return;
+    let filtered = [...reports];
 
-    let filtered = [...reports].filter(report => report.estado === 'activo');
-
-    // Filtrar por ubicación
-    if (filter === 'nearby' && userLocation) {
-      filtered = filtered.filter(report => {
-        const distance = calculateDistance(
-          userLocation.lat,
-          userLocation.lng,
-          report.latitud,
-          report.longitud
-        );
-        return distance <= 800; // 5 cuadras ≈ 800 metros
-      });
+    if (filter !== 'Todos') {
+      filtered = filtered.filter(report => report.tipo_nombre === filter);
     }
 
-    // Ordenar reportes
     filtered.sort((a, b) => {
-      if (sortBy === 'date') {
-        return new Date(b.fecha_creacion) - new Date(a.fecha_creacion);
-      } else if (sortBy === 'distance' && userLocation) {
-        const distA = calculateDistance(
-          userLocation.lat,
-          userLocation.lng,
-          a.latitud,
-          a.longitud
-        );
-        const distB = calculateDistance(
-          userLocation.lat,
-          userLocation.lng,
-          b.latitud,
-          b.longitud
-        );
-        return distA - distB;
-      }
-      return 0;
+      const dateA = new Date(a.fecha_creacion);
+      const dateB = new Date(b.fecha_creacion);
+      return sortBy === 'Más recientes' ? dateB - dateA : dateA - dateB;
     });
 
     setFilteredReports(filtered);
-  }, [reports, filter, sortBy, userLocation]);
+  }, [reports, filter, sortBy]);
 
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371e3; // Radio de la tierra en metros
-    const φ1 = lat1 * Math.PI/180;
-    const φ2 = lat2 * Math.PI/180;
-    const Δφ = (lat2-lat1) * Math.PI/180;
-    const Δλ = (lon2-lon1) * Math.PI/180;
+  const handleConfirmReport = async (reportId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/reports/${reportId}/confirm`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      if (!response.ok) {
+        throw new Error('Error al confirmar el reporte');
+      }
 
-    return R * c;
-  };
-
-  const formatDistance = (meters) => {
-    if (meters < 1000) {
-      return `${Math.round(meters)} m`;
+      // Actualizar la lista de reportes
+      if (onReportClick) {
+        onReportClick(reportId, 'confirm');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al confirmar el reporte');
     }
-    return `${(meters/1000).toFixed(1)} km`;
   };
 
-  const formatTime = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = Math.floor((now - date) / 1000); // diferencia en segundos
+  const handleVerifyReport = async (reportId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/reports/${reportId}/verify`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
-    if (diff < 60) return 'hace un momento';
-    if (diff < 3600) return `hace ${Math.floor(diff/60)} minutos`;
-    if (diff < 86400) return `hace ${Math.floor(diff/3600)} horas`;
-    return date.toLocaleDateString();
+      if (!response.ok) {
+        throw new Error('Error al verificar el reporte');
+      }
+
+      if (onReportClick) {
+        onReportClick(reportId, 'verify');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al verificar el reporte');
+    }
   };
 
-  const getReportTypeIcon = (type) => {
-    // Aquí podrías mapear los tipos de reporte a sus iconos correspondientes
-    const icons = {
-      1: <FaExclamationCircle className="type-icon accident" />,
-      2: <FaExclamationCircle className="type-icon construction" />,
-      3: <FaExclamationCircle className="type-icon road-closed" />,
-      // ... más tipos
-    };
-    return icons[type] || <FaExclamationCircle className="type-icon" />;
+  const getTimeAgo = (date) => {
+    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+    
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + ' años';
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + ' meses';
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + ' días';
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + ' horas';
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + ' minutos';
+    return Math.floor(seconds) + ' segundos';
   };
 
   return (
     <div className="reports-list">
       <div className="reports-header">
-        <h3>Reportes Activos</h3>
-        <div className="reports-controls">
+        <h3><FaExclamationTriangle /> Reportes Activos</h3>
+        <div className="reports-filters">
           <select 
-            value={filter} 
+            value={filter}
             onChange={(e) => setFilter(e.target.value)}
             className="filter-select"
           >
-            <option value="all">Todos</option>
-            <option value="nearby">Cercanos</option>
-            <option value="route">En mi ruta</option>
+            <option value="Todos">🔍 Todos</option>
+            <option value="Accidente">🚨 Accidentes</option>
+            <option value="Obra">🚧 Obras</option>
+            <option value="Corte">🚫 Cortes</option>
+            <option value="Manifestación">👥 Manifestaciones</option>
+            <option value="Inundación">💧 Inundaciones</option>
+            <option value="Semáforo">🚦 Semáforos</option>
           </select>
+
           <select 
-            value={sortBy} 
+            value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             className="sort-select"
           >
-            <option value="date">Más recientes</option>
-            <option value="distance">Más cercanos</option>
+            <option value="Más recientes">⌚ Más recientes</option>
+            <option value="Más antiguos">📅 Más antiguos</option>
           </select>
         </div>
       </div>
 
-      {filteredReports.length === 0 ? (
-        <div className="no-reports">
-          <FaExclamationCircle />
-          <p>No hay reportes activos {filter === 'nearby' ? 'en tu zona' : ''}</p>
-        </div>
-      ) : (
-        <div className="reports-container">
-          {filteredReports.map((report) => (
-            <div key={report.id} className="report-card">
-              <div className="report-header">
-                {getReportTypeIcon(report.tipo_id)}
-                <h4>{report.tipo_nombre}</h4>
-                <span className="report-time">
-                  <FaClock /> {formatTime(report.fecha_creacion)}
-                </span>
+      <div className="reports-container">
+        {filteredReports.length === 0 ? (
+          <div className="no-reports">
+            <p>No hay reportes activos</p>
+          </div>
+        ) : (
+          filteredReports.map(report => (
+            <div 
+              key={report.id} 
+              className={`report-item ${report.estado}`}
+              onClick={() => onReportClick && onReportClick(report)}
+            >
+              <div className="report-type">
+                {report.tipo_nombre}
+                {report.confirmaciones > 0 && (
+                  <span className="confirmations">
+                    <FaCheck /> {report.confirmaciones}
+                  </span>
+                )}
               </div>
-              
               <div className="report-content">
                 <p className="report-description">{report.descripcion}</p>
-                
-                <div className="report-details">
-                  <div className="report-location">
-                    <FaMapMarkerAlt />
-                    {userLocation && (
-                      <span>
-                        {formatDistance(calculateDistance(
-                          userLocation.lat,
-                          userLocation.lng,
-                          report.latitud,
-                          report.longitud
-                        ))}
-                      </span>
-                    )}
-                  </div>
-                  
-                  <div className="report-creator">
-                    <FaUser />
-                    <span>{report.creador_nombre}</span>
-                  </div>
+                <div className="report-meta">
+                  <span className="report-time">
+                    <FaClock /> {getTimeAgo(report.fecha_creacion)}
+                  </span>
+                  <span className="report-location">
+                    <FaMapMarkerAlt /> Ver en mapa
+                  </span>
                 </div>
               </div>
+              <div className="report-actions">
+                {userRole === 'usuario' && (
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleConfirmReport(report.id);
+                    }}
+                    className="confirm-button"
+                    title="Confirmar reporte"
+                  >
+                    <FaCheck />
+                  </button>
+                )}
+                {userRole === 'admin' && (
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleVerifyReport(report.id);
+                    }}
+                    className="verify-button"
+                    title="Verificar reporte"
+                  >
+                    <FaExclamationTriangle />
+                  </button>
+                )}
+              </div>
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   );
 };

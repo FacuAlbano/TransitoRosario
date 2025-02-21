@@ -51,17 +51,32 @@ const FavoriteRoutes = ({ onRouteSelect }) => {
     }
   };
 
-  const handleRouteClick = (route) => {
+  const handleRouteClick = async (route) => {
     try {
-      const routeData = typeof route.ruta_data === 'string' 
-        ? JSON.parse(route.ruta_data) 
-        : route.ruta_data;
+      const directionsService = new window.google.maps.DirectionsService();
+      
+      // Crear el request para el servicio de direcciones
+      const request = {
+        origin: route.origen,
+        destination: route.destino,
+        travelMode: window.google.maps.TravelMode.DRIVING,
+        provideRouteAlternatives: false
+      };
 
-      onRouteSelect({
-        origin: routeData.legs[0].start_location,
-        destination: routeData.legs[0].end_location,
-        routes: [routeData],
-        selectedRouteIndex: 0
+      // Obtener una nueva ruta usando el servicio de direcciones
+      directionsService.route(request, (result, status) => {
+        if (status === 'OK') {
+          const routeForMap = {
+            origin: result.routes[0].legs[0].start_location,
+            destination: result.routes[0].legs[0].end_location,
+            routes: result.routes,
+            selectedRouteIndex: 0
+          };
+          
+          onRouteSelect(routeForMap);
+        } else {
+          console.error('Error al obtener la ruta:', status);
+        }
       });
     } catch (error) {
       console.error('Error al cargar la ruta:', error);

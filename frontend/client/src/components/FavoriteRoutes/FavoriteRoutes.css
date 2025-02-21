@@ -1,13 +1,29 @@
 .favorite-routes {
   background: rgba(3, 233, 244, 0.05);
-  backdrop-filter: blur(10px);
+  border: 1px solid rgba(3, 233, 244, 0.2);
   border-radius: 10px;
-  padding: 20px;
-  height: 100%;
+  padding: 15px;
+  backdrop-filter: blur(10px);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.favorite-routes-list {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  border: 1px solid rgba(3, 233, 244, 0.2);
+  gap: 10px;
+}
+
+.favorite-route-item {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.favorite-route-item:hover {
+  background: rgba(3, 233, 244, 0.2);
 }
 
 .favorite-routes-header {
@@ -27,33 +43,7 @@
 }
 
 .search-box {
-  position: relative;
-  margin-bottom: 15px;
-}
-
-.search-box input {
-  width: 100%;
-  padding: 10px 35px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(3, 233, 244, 0.2);
-  border-radius: 5px;
-  color: white;
-  font-size: 0.9em;
-  transition: all 0.3s ease;
-}
-
-.search-box input:focus {
-  outline: none;
-  border-color: #03e9f4;
-  box-shadow: 0 0 10px rgba(3, 233, 244, 0.2);
-}
-
-.search-icon {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #03e9f4;
+  display: none; /* Ocultar el panel de búsqueda */
 }
 
 .routes-list {
@@ -63,16 +53,13 @@
 }
 
 .route-item {
-  padding: 12px;
-  border-radius: 8px;
   background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 15px;
   margin-bottom: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
   border: 1px solid transparent;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .route-item:hover {
@@ -83,7 +70,7 @@
 
 .route-content {
   flex: 1;
-  margin-right: 15px;
+  cursor: pointer;
 }
 
 .route-details {
