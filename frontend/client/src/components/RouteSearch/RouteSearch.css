@@ -204,10 +204,12 @@
 }
 
 .route-options {
-  margin-top: 15px;
+  margin-top: 10px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  padding: 15px;
+  border-radius: 8px;
+  padding: 10px;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .route-options h3 {
@@ -220,12 +222,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
-  margin-bottom: 8px;
+  padding: 8px;
+  margin-bottom: 5px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  font-size: 0.9em;
 }
 
 .route-option:hover {
@@ -239,16 +241,43 @@
 
 .route-info {
   display: flex;
-  gap: 15px;
-  color: white;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.route-main-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.route-via {
+  font-size: 0.8em;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .route-duration {
   font-weight: bold;
+  color: #03e9f4;
 }
 
 .route-distance {
   color: rgba(255, 255, 255, 0.7);
+}
+
+/* Personalizar scrollbar */
+.route-options::-webkit-scrollbar {
+  width: 6px;
+}
+
+.route-options::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.route-options::-webkit-scrollbar-thumb {
+  background: rgba(3, 233, 244, 0.3);
+  border-radius: 3px;
 }
 
 .save-route-button {

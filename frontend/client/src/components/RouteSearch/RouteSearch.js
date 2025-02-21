@@ -89,13 +89,26 @@ const RouteSearch = ({ userLocation, onRouteSelect }) => {
           origin: originLoc,
           destination: destLoc,
           travelMode: window.google.maps.TravelMode.DRIVING,
-          provideRouteAlternatives: true
+          provideRouteAlternatives: true,
+          optimizeWaypoints: false,
+          avoidHighways: false,
+          avoidTolls: false
         }, (result, status) => {
           if (status === 'OK') {
-            const routesWithInfo = result.routes.map((route, index) => ({
+            const uniqueRoutes = result.routes.filter((route, index, self) => {
+              if (index === 0) return true;
+              const prevRoute = self[index - 1];
+              const distanceDiff = Math.abs(
+                route.legs[0].distance.value - prevRoute.legs[0].distance.value
+              );
+              return distanceDiff > 1000;
+            });
+
+            const routesWithInfo = uniqueRoutes.map((route, index) => ({
               ...route,
               duration: route.legs[0].duration.text,
               distance: route.legs[0].distance.text,
+              via: getMainRoadName(route),
               isSelected: index === 0
             }));
             
@@ -105,7 +118,7 @@ const RouteSearch = ({ userLocation, onRouteSelect }) => {
             onRouteSelect({
               origin: originLoc,
               destination: destLoc,
-              routes: result.routes,
+              routes: routesWithInfo,
               selectedRouteIndex: 0
             });
           }
@@ -224,6 +237,26 @@ const RouteSearch = ({ userLocation, onRouteSelect }) => {
     const tempOrigin = origin;
     setOrigin(destination);
     setDestination(tempOrigin);
+  };
+
+  const getMainRoadName = (route) => {
+    try {
+      const steps = route.legs[0].steps;
+      let longestStep = steps[0];
+      
+      steps.forEach(step => {
+        if (step.distance.value > longestStep.distance.value) {
+          longestStep = step;
+        }
+      });
+
+      return longestStep.instructions
+        .replace(/<[^>]*>/g, '')
+        .replace(/Dirígete|Gira|hacia|por|el|la|los|las/gi, '')
+        .trim();
+    } catch (error) {
+      return '';
+    }
   };
 
   return (

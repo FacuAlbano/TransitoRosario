@@ -23,6 +23,7 @@ const FavoriteRoutes = ({ onRouteSelect }) => {
 
       if (response.ok) {
         const routes = await response.json();
+        console.log('Rutas favoritas cargadas:', routes);
         setFavoriteRoutes(routes);
       }
     } catch (error) {
@@ -51,18 +52,25 @@ const FavoriteRoutes = ({ onRouteSelect }) => {
   };
 
   const handleRouteClick = (route) => {
-    const routeData = JSON.parse(route.routeData);
-    onRouteSelect({
-      origin: routeData.legs[0].start_location,
-      destination: routeData.legs[0].end_location,
-      routes: [routeData],
-      selectedRouteIndex: 0
-    });
+    try {
+      const routeData = typeof route.ruta_data === 'string' 
+        ? JSON.parse(route.ruta_data) 
+        : route.ruta_data;
+
+      onRouteSelect({
+        origin: routeData.legs[0].start_location,
+        destination: routeData.legs[0].end_location,
+        routes: [routeData],
+        selectedRouteIndex: 0
+      });
+    } catch (error) {
+      console.error('Error al cargar la ruta:', error);
+    }
   };
 
   const filteredRoutes = favoriteRoutes.filter(route =>
-    route.origin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    route.destination.toLowerCase().includes(searchTerm.toLowerCase())
+    (route.origen?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+    (route.destino?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -96,13 +104,13 @@ const FavoriteRoutes = ({ onRouteSelect }) => {
               <div className="route-content" onClick={() => handleRouteClick(route)}>
                 <div className="route-details">
                   <div className="route-endpoints">
-                    <span className="origin">{route.origin}</span>
+                    <span className="origin">{route.origen}</span>
                     <span className="separator">→</span>
-                    <span className="destination">{route.destination}</span>
+                    <span className="destination">{route.destino}</span>
                   </div>
                   <div className="route-meta">
-                    <span className="duration">{route.duration}</span>
-                    <span className="distance">{route.distance}</span>
+                    <span className="duration">{route.duracion}</span>
+                    <span className="distance">{route.distancia}</span>
                   </div>
                 </div>
               </div>
