@@ -6,6 +6,10 @@ import Navbar from './components/Navbar/Navbar';  // Corregir la importación de
 import Footer from './components/footer/Footer';  // Importar el componente Footer  
 import Buses from './pages/buses/Buses';
 import Gallery from './pages/gallery/Gallery';
+import About from './pages/about/About';
+import Register from './pages/register/Register';
+import Login from './pages/login/Login';
+import User from './pages/user/User';
 
 const App = () => {
   return (
@@ -13,8 +17,12 @@ const App = () => {
       <Navbar />  {/* Usar el componente Navbar con la primera letra en mayúscula */}
       <Routes>  {/* Usar Routes para definir las rutas */}
         <Route path="/" element={<Home />} />  {/* Usar Home con la primera letra en mayúscula */}
-        <Route path="/Buses" element={<Buses />} />  {/* Usar Buses con la primera letra en mayúscula */}
-        <Route path="/Gallery" element={<Gallery />} />  {/* Usar Buses con la primera letra en mayúscula */}
+        <Route path="/buses" element={<Buses />} />  {/* Usar Buses con la primera letra en mayúscula */}
+        <Route path="/gallery" element={<Gallery />} />  {/* Usar Buses con la primera letra en mayúscula */} 
+        <Route path="/about" element={<About />} />  {/* Usar Buses con la primera letra en mayúscula */} 
+        <Route path="/register" element={<Register />} />  {/* Usar Buses con la primera letra en mayúscula */} 
+        <Route path="/login" element={<Login />} />  {/* Usar Buses con la primera letra en mayúscula */} 
+        <Route path="/user" element={<User />} />  {/* Usar Buses con la primera letra en mayúscula */} 
       </Routes>
       <Footer />  {/* Usar el componente Footer */}
     </div>

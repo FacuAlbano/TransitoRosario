@@ -81,3 +81,27 @@
     transform: scale(1.1);
     filter: brightness(1.2);
 }
+
+.user-info {
+    color: white;
+    margin-right: 15px;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.auth-button {
+    background: none;
+    border: 2px solid #03e9f4;
+    color: #03e9f4;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.auth-button:hover {
+    background: #03e9f4;
+    color: white;
+    box-shadow: 0 0 10px rgba(3, 233, 244, 0.5);
+}
