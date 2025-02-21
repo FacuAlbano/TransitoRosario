@@ -5,10 +5,6 @@ const reportSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  tipo_nombre: {
-    type: String,
-    required: true
-  },
   descripcion: {
     type: String,
     required: true
@@ -29,14 +25,14 @@ const reportSchema = new mongoose.Schema({
     type: Date,
     required: true
   },
-  confirmaciones: {
-    type: Number,
-    default: 0
-  },
   estado: {
     type: String,
     enum: ['activo', 'expirado', 'verificado'],
     default: 'activo'
+  },
+  confirmaciones: {
+    type: Number,
+    default: 0
   },
   creador: {
     type: mongoose.Schema.Types.ObjectId,

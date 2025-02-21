@@ -1,14 +1,60 @@
-import React, { useState } from 'react';
-import { FaExclamationTriangle, FaMapMarkerAlt } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaExclamationTriangle, FaMapMarkerAlt, FaLocationArrow } from 'react-icons/fa';
 import './ReportCreator.css';
 import { useReports } from '../../context/ReportContext';
 
-const ReportCreator = ({ userLocation, onReportCreated }) => {
-  const { addReport, fetchReports } = useReports();
+const ReportCreator = () => {
+  const { addReport } = useReports();
   const [reportData, setReportData] = useState({
-    tipo: '',
-    descripcion: ''
+    tipo_id: '',
+    descripcion: '',
+    latitud: null,
+    longitud: null
   });
+  const [userLocation, setUserLocation] = useState(null);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+
+  // Obtener ubicación al montar el componente
+  useEffect(() => {
+    getCurrentLocation();
+  }, []);
+
+  const getCurrentLocation = () => {
+    setIsGettingLocation(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+          setReportData(prev => ({
+            ...prev,
+            latitud: position.coords.latitude,
+            longitud: position.coords.longitude
+          }));
+          setIsGettingLocation(false);
+        },
+        (error) => {
+          console.error('Error obteniendo ubicación:', error);
+          // Ubicación por defecto: Rosario
+          const defaultLocation = { lat: -32.9595, lng: -60.6393 };
+          setUserLocation(defaultLocation);
+          setReportData(prev => ({
+            ...prev,
+            latitud: defaultLocation.lat,
+            longitud: defaultLocation.lng
+          }));
+          setIsGettingLocation(false);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        }
+      );
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,24 +66,10 @@ const ReportCreator = ({ userLocation, onReportCreated }) => {
         return;
       }
 
-      if (!userLocation) {
-        alert('No se pudo obtener la ubicación');
+      if (!reportData.latitud || !reportData.longitud) {
+        alert('No se pudo obtener la ubicación. Por favor, intenta de nuevo.');
         return;
       }
-
-      // Formatear la fecha correctamente para MySQL
-      const fecha = new Date(Date.now() + 24*60*60*1000);
-      const fechaFormateada = fecha.toISOString().slice(0, 19).replace('T', ' ');
-
-      const reporteData = {
-        tipo_id: parseInt(reportData.tipo),
-        descripcion: reportData.descripcion,
-        latitud: userLocation.lat,
-        longitud: userLocation.lng,
-        fecha_expiracion: fechaFormateada
-      };
-
-      console.log('Enviando datos:', reporteData);
 
       const response = await fetch('http://localhost:5000/api/reports', {
         method: 'POST',
@@ -45,30 +77,32 @@ const ReportCreator = ({ userLocation, onReportCreated }) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(reporteData)
+        body: JSON.stringify({
+          tipo_id: parseInt(reportData.tipo_id),
+          descripcion: reportData.descripcion,
+          latitud: reportData.latitud,
+          longitud: reportData.longitud
+        })
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || errorData.message || 'Error al crear el reporte');
+        throw new Error(errorData.message || 'Error al crear el reporte');
       }
 
       const newReport = await response.json();
+      addReport(newReport);
 
       setReportData({
-        tipo: '',
-        descripcion: ''
+        tipo_id: '',
+        descripcion: '',
+        latitud: userLocation?.lat || null,
+        longitud: userLocation?.lng || null
       });
-
-      if (onReportCreated) {
-        onReportCreated(newReport);
-      }
-
-      addReport(newReport);
 
       alert('Reporte creado exitosamente');
     } catch (error) {
-      console.error('Error completo:', error);
+      console.error('Error:', error);
       alert(`Error: ${error.message}`);
     }
   };
@@ -80,8 +114,8 @@ const ReportCreator = ({ userLocation, onReportCreated }) => {
       </h3>
       <form onSubmit={handleSubmit}>
         <select
-          value={reportData.tipo}
-          onChange={(e) => setReportData(prev => ({ ...prev, tipo: e.target.value }))}
+          value={reportData.tipo_id}
+          onChange={(e) => setReportData(prev => ({ ...prev, tipo_id: e.target.value }))}
           required
         >
           <option value="">Selecciona un tipo de incidente</option>
@@ -100,13 +134,39 @@ const ReportCreator = ({ userLocation, onReportCreated }) => {
           required
         />
 
-        {userLocation && (
-          <div className="location-info">
-            <FaMapMarkerAlt /> Ubicación seleccionada
-          </div>
-        )}
+        <div className="location-info">
+          {isGettingLocation ? (
+            <div className="getting-location">
+              <FaLocationArrow className="spinning" /> Obteniendo ubicación...
+            </div>
+          ) : userLocation ? (
+            <div className="location-set">
+              <FaMapMarkerAlt /> Ubicación establecida
+              <button 
+                type="button" 
+                className="refresh-location"
+                onClick={getCurrentLocation}
+                title="Actualizar ubicación"
+              >
+                <FaLocationArrow />
+              </button>
+            </div>
+          ) : (
+            <button 
+              type="button" 
+              className="get-location-btn"
+              onClick={getCurrentLocation}
+            >
+              <FaLocationArrow /> Obtener ubicación
+            </button>
+          )}
+        </div>
 
-        <button type="submit" className="create-report-btn">
+        <button 
+          type="submit" 
+          className="create-report-btn"
+          disabled={isGettingLocation || !userLocation}
+        >
           <FaExclamationTriangle /> Crear Reporte
         </button>
       </form>

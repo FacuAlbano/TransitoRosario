@@ -35,7 +35,7 @@ const Carrusel = () => {
           prevIndex === images.length - 1 ? 0 : prevIndex + 1
         );
       }
-    }, 20000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, [isHovered]);

@@ -215,4 +215,72 @@
   font-size: 0.9em;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+.location-info {
+  margin: 15px 0;
+  padding: 10px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.getting-location {
+  color: #03e9f4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.location-set {
+  color: #00ff00;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.refresh-location {
+  background: none;
+  border: none;
+  color: #03e9f4;
+  cursor: pointer;
+  padding: 5px;
+  transition: transform 0.3s ease;
+}
+
+.refresh-location:hover {
+  transform: rotate(180deg);
+}
+
+.get-location-btn {
+  background: rgba(3, 233, 244, 0.1);
+  border: 1px solid rgba(3, 233, 244, 0.3);
+  color: #03e9f4;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.get-location-btn:hover {
+  background: rgba(3, 233, 244, 0.2);
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.create-report-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 } 

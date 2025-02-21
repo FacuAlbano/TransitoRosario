@@ -3,17 +3,52 @@ import { useState, useEffect, useCallback } from 'react';
 import { FaChevronLeft, FaChevronRight, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 import './NewsCarousel.css';
 
-const NewsCarousel = ({ reports }) => {
+const NewsCarousel = () => {
   const [activeReports, setActiveReports] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
+  // Obtener reportes del servidor
   useEffect(() => {
-    if (!reports) return;
-    const filtered = reports.filter(report => report.estado === 'activo');
-    setActiveReports(filtered);
-  }, [reports]);
+    const fetchReports = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:5000/api/reports/active', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
 
+        if (!response.ok) throw new Error('Error al obtener reportes');
+        
+        const data = await response.json();
+        const now = new Date();
+        const thirtyMinutesAgo = new Date(now - 30 * 60000);
+
+        const filtered = data.filter(report => {
+          const expirationDate = new Date(report.fecha_expiracion);
+          const creationDate = new Date(report.fecha_creacion);
+          return (
+            report.estado === 'activo' &&
+            expirationDate > now &&
+            creationDate > thirtyMinutesAgo
+          );
+        });
+
+        setActiveReports(filtered);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+
+    fetchReports();
+    // Actualizar más frecuentemente
+    const interval = setInterval(fetchReports, 15000); // Cada 15 segundos
+    return () => clearInterval(interval);
+  }, []);
+
+  // Auto-reproducción
   useEffect(() => {
     let interval;
     if (isAutoPlaying && activeReports.length > 1) {
@@ -21,7 +56,7 @@ const NewsCarousel = ({ reports }) => {
         setCurrentIndex(current => 
           current === activeReports.length - 1 ? 0 : current + 1
         );
-      }, 5000); // Cambiar cada 5 segundos
+      }, 5000);
     }
     return () => clearInterval(interval);
   }, [isAutoPlaying, activeReports.length]);
@@ -63,8 +98,21 @@ const NewsCarousel = ({ reports }) => {
     return colors[type] || '#03e9f4';
   };
 
+  const formatLocation = (lat, lng) => {
+    try {
+      const latitude = parseFloat(lat);
+      const longitude = parseFloat(lng);
+      if (isNaN(latitude) || isNaN(longitude)) {
+        return 'Ubicación no disponible';
+      }
+      return `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+    } catch (error) {
+      return 'Ubicación no disponible';
+    }
+  };
+
   if (!activeReports.length) {
-    return null;
+    return <div className="news-carousel empty">No hay reportes activos</div>;
   }
 
   const currentReport = activeReports[currentIndex];
@@ -98,7 +146,9 @@ const NewsCarousel = ({ reports }) => {
             <div className="report-details">
               <div className="location">
                 <FaMapMarkerAlt />
-                <span>{currentReport.ubicacion}</span>
+                <span>
+                  {formatLocation(currentReport.latitud, currentReport.longitud)}
+                </span>
               </div>
               
               <div className="time">
@@ -106,16 +156,6 @@ const NewsCarousel = ({ reports }) => {
                 <span>{formatTime(currentReport.fecha_creacion)}</span>
               </div>
             </div>
-          </div>
-
-          <div className="progress-bar">
-            <div 
-              className="progress"
-              style={{
-                width: `${((currentIndex + 1) / activeReports.length) * 100}%`,
-                backgroundColor: getReportTypeColor(currentReport.tipo_id)
-              }}
-            />
           </div>
         </div>
 

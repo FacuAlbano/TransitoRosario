@@ -12,23 +12,25 @@ export const ReportProvider = ({ children }) => {
 
   const fetchReports = async () => {
     try {
-      setLoading(true);
       const token = localStorage.getItem('token');
-      if (!token) return;
+      if (!token) {
+        console.log('No hay token disponible');
+        return;
+      }
 
       const response = await fetch('http://localhost:5000/api/reports/active', {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Reportes cargados:', data); // Para debug
-        setReports(data);
-      } else {
-        console.error('Error al cargar reportes:', await response.text());
+      if (!response.ok) {
+        throw new Error(`Error al obtener reportes: ${await response.text()}`);
       }
+
+      const data = await response.json();
+      setReports(data);
     } catch (error) {
       console.error('Error al cargar reportes:', error);
     } finally {
@@ -52,11 +54,7 @@ export const ReportProvider = ({ children }) => {
   }, [isAuthenticated]);
 
   const addReport = (newReport) => {
-    console.log('Añadiendo nuevo reporte:', newReport); // Para debug
-    setReports(prevReports => {
-      const updated = [...prevReports, newReport];
-      return updated;
-    });
+    setReports(prevReports => [...prevReports, newReport]);
   };
 
   const updateReport = (reportId, updates) => {
@@ -67,13 +65,20 @@ export const ReportProvider = ({ children }) => {
     );
   };
 
+  const removeReport = (reportId) => {
+    setReports(prevReports => 
+      prevReports.filter(report => report.id !== reportId)
+    );
+  };
+
   return (
     <ReportContext.Provider value={{ 
       reports, 
       loading,
       fetchReports, 
       addReport, 
-      updateReport 
+      updateReport,
+      removeReport
     }}>
       {children}
     </ReportContext.Provider>

@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const mysql = require('mysql2');
 const app = express();
 
 // Middleware
@@ -11,6 +12,31 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Conexión a MySQL
+const db = mysql.createConnection({
+  host: 'localhost',
+  port: 3307,
+  user: 'root',
+  password: 'falbano.106',
+  database: 'trro_db'
+});
+
+db.connect((err) => {
+  if (err) {
+    console.error('Error conectando a la base de datos:', err);
+    return;
+  }
+  console.log('Base de datos conectada exitosamente');
+});
+
+global.db = db;
+
+// Rutas
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/reports', require('./routes/reports'));
+app.use('/api/routes', require('./routes/routes'));
+
 // Manejo de errores global
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -19,12 +45,6 @@ app.use((err, req, res, next) => {
     error: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
 });
-
-// Rutas
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/users', require('./routes/users'));
-app.use('/api/reports', require('./routes/reports'));
-app.use('/api/routes', require('./routes/routes'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

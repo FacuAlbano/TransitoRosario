@@ -27,20 +27,31 @@ const ReportsList = ({ userLocation }) => {
 
   useEffect(() => {
     if (!reports) return;
-    
+
+    const now = new Date();
+    const thirtyMinutesAgo = new Date(now - 30 * 60000);
+
     let filtered = reports.filter(report => {
       const expirationDate = new Date(report.fecha_expiracion);
-      return expirationDate > new Date();
+      const creationDate = new Date(report.fecha_creacion);
+      return (
+        report.estado === 'activo' &&
+        expirationDate > now &&
+        creationDate > thirtyMinutesAgo
+      );
     });
 
     if (filter !== 'all') {
       filtered = filtered.filter(report => report.tipo_id === parseInt(filter));
     }
 
+    // Ordenar reportes
     filtered.sort((a, b) => {
-      const dateA = new Date(a.fecha_creacion);
-      const dateB = new Date(b.fecha_creacion);
-      return sort === 'recent' ? dateB - dateA : dateA - dateB;
+      if (sort === 'recent') {
+        return new Date(b.fecha_creacion) - new Date(a.fecha_creacion);
+      } else {
+        return new Date(a.fecha_creacion) - new Date(b.fecha_creacion);
+      }
     });
 
     setFilteredReports(filtered);
@@ -103,21 +114,37 @@ const ReportsList = ({ userLocation }) => {
     }
   };
 
-  const getTimeAgo = (date) => {
-    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-    
-    let interval = seconds / 31536000;
-    if (interval > 1) return Math.floor(interval) + ' años';
-    interval = seconds / 2592000;
-    if (interval > 1) return Math.floor(interval) + ' meses';
-    interval = seconds / 86400;
-    if (interval > 1) return Math.floor(interval) + ' días';
-    interval = seconds / 3600;
-    if (interval > 1) return Math.floor(interval) + ' horas';
-    interval = seconds / 60;
-    if (interval > 1) return Math.floor(interval) + ' minutos';
-    return Math.floor(seconds) + ' segundos';
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000);
+
+    if (diff < 60) return 'hace un momento';
+    if (diff < 3600) return `hace ${Math.floor(diff/60)} minutos`;
+    if (diff < 86400) return `hace ${Math.floor(diff/3600)} horas`;
+    return date.toLocaleDateString();
   };
+
+  const formatLocation = (lat, lng) => {
+    try {
+      const latitude = parseFloat(lat);
+      const longitude = parseFloat(lng);
+      if (isNaN(latitude) || isNaN(longitude)) {
+        return 'Ubicación no disponible';
+      }
+      return `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+    } catch (error) {
+      return 'Ubicación no disponible';
+    }
+  };
+
+  if (loading) {
+    return <div className="reports-list loading">Cargando reportes...</div>;
+  }
+
+  if (!filteredReports.length) {
+    return <div className="reports-list empty">No hay reportes activos</div>;
+  }
 
   return (
     <div className="reports-list">
@@ -129,13 +156,13 @@ const ReportsList = ({ userLocation }) => {
             onChange={(e) => setFilter(e.target.value)}
             className="filter-select"
           >
-            <option value="Todos">🔍 Todos</option>
-            <option value="Accidente">🚨 Accidentes</option>
-            <option value="Obra">🚧 Obras</option>
-            <option value="Corte">🚫 Cortes</option>
-            <option value="Manifestación">👥 Manifestaciones</option>
-            <option value="Inundación">💧 Inundaciones</option>
-            <option value="Semáforo">🚦 Semáforos</option>
+            <option value="all">Todos los tipos</option>
+            <option value="1">Accidente</option>
+            <option value="2">Obra</option>
+            <option value="3">Corte</option>
+            <option value="4">Manifestación</option>
+            <option value="5">Inundación</option>
+            <option value="6">Semáforo</option>
           </select>
 
           <select 
@@ -143,73 +170,63 @@ const ReportsList = ({ userLocation }) => {
             onChange={(e) => setSort(e.target.value)}
             className="sort-select"
           >
-            <option value="Más recientes">⌚ Más recientes</option>
-            <option value="Más antiguos">📅 Más antiguos</option>
+            <option value="recent">Más recientes</option>
+            <option value="oldest">Más antiguos</option>
           </select>
         </div>
       </div>
 
       <div className="reports-container">
-        {loading ? (
-          <div className="loading">Cargando reportes...</div>
-        ) : filteredReports.length === 0 ? (
-          <div className="no-reports">
-            <p>No hay reportes activos</p>
-          </div>
-        ) : (
-          filteredReports.map(report => (
-            <div 
-              key={report.id} 
-              className={`report-item ${report.estado}`}
-            >
-              <div className="report-type">
+        {filteredReports.map(report => (
+          <div key={report.id} className="report-card">
+            <div className="report-header">
+              <span className={`report-type type-${report.tipo_id}`}>
                 {report.tipo_nombre}
-                {report.confirmaciones > 0 && (
-                  <span className="confirmations">
-                    <FaCheck /> {report.confirmaciones}
-                  </span>
-                )}
-              </div>
-              <div className="report-content">
-                <p className="report-description">{report.descripcion}</p>
-                <div className="report-meta">
-                  <span className="report-time">
-                    <FaClock /> {getTimeAgo(report.fecha_creacion)}
-                  </span>
-                  <span className="report-location">
-                    <FaMapMarkerAlt /> Ver en mapa
-                  </span>
-                </div>
-              </div>
-              <div className="report-actions">
-                {canCreateReports() && (
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleConfirmReport(report.id);
-                    }}
-                    className="confirm-button"
-                    title="Confirmar reporte"
-                  >
-                    <FaCheck />
-                  </button>
-                )}
-                {canVerifyReports() && (
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleVerifyReport(report.id);
-                    }}
-                    className="verify-button"
-                    title="Verificar reporte"
-                  >
-                    <FaExclamationTriangle />
-                  </button>
-                )}
+              </span>
+              <span className="report-time">
+                <FaClock /> {formatTime(report.fecha_creacion)}
+              </span>
+            </div>
+
+            <div className="report-content">
+              <p>{report.descripcion}</p>
+              <div className="report-location">
+                <FaMapMarkerAlt />
+                {formatLocation(report.latitud, report.longitud)}
               </div>
             </div>
-          ))
-        )}
+
+            <div className="report-footer">
+              <span className="report-author">
+                Por: {report.creador_nombre}
+              </span>
+              {canCreateReports() && (
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleConfirmReport(report.id);
+                  }}
+                  className="confirm-button"
+                  title="Confirmar reporte"
+                >
+                  <FaCheck />
+                </button>
+              )}
+              {canVerifyReports() && (
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleVerifyReport(report.id);
+                  }}
+                  className="verify-button"
+                  title="Verificar reporte"
+                >
+                  <FaExclamationTriangle />
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
