@@ -33,16 +33,27 @@ const Register = () => {
   });
 
   useEffect(() => {
-    initAutocomplete();
+    // Asegurarnos de que Google Maps esté cargado
+    if (window.google && window.google.maps) {
+      initAutocomplete();
+    }
   }, []);
 
   const initAutocomplete = () => {
-    const addressInput = document.getElementById('direccion');
-    if (window.google && addressInput) {
-      const autocomplete = new window.google.maps.places.Autocomplete(addressInput);
-      
+    try {
+      const addressInput = document.getElementById('direccion');
+      if (!addressInput) return;
+
+      const autocomplete = new window.google.maps.places.Autocomplete(addressInput, {
+        componentRestrictions: { country: 'AR' }, // Restringir a Argentina
+        fields: ['address_components', 'formatted_address'],
+        types: ['address']
+      });
+
       autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
+        if (!place.address_components) return;
+
         let addressData = {
           direccion: '',
           ciudad: '',
@@ -51,38 +62,46 @@ const Register = () => {
           codigoPostal: ''
         };
 
-        for (const component of place.address_components) {
-          const componentType = component.types[0];
-
-          switch (componentType) {
-            case 'street_number':
-              addressData.direccion = `${component.long_name} ${addressData.direccion}`;
-              break;
-            case 'route':
-              addressData.direccion += component.long_name;
-              break;
-            case 'locality':
-              addressData.ciudad = component.long_name;
-              break;
-            case 'administrative_area_level_1':
-              addressData.provincia = component.long_name;
-              break;
-            case 'country':
-              addressData.pais = component.long_name;
-              break;
-            case 'postal_code':
-              addressData.codigoPostal = component.long_name;
-              break;
-            default:
-              break;
+        // Mapear los componentes de la dirección
+        place.address_components.forEach(component => {
+          const type = component.types[0];
+          
+          if (type === 'street_number' || type === 'route') {
+            addressData.direccion += `${component.long_name} `;
           }
-        }
+          else if (type === 'locality') {
+            addressData.ciudad = component.long_name;
+          }
+          else if (type === 'administrative_area_level_1') {
+            addressData.provincia = component.long_name;
+          }
+          else if (type === 'country') {
+            addressData.pais = component.long_name;
+          }
+          else if (type === 'postal_code') {
+            addressData.codigoPostal = component.long_name;
+          }
+        });
 
+        // Limpiar la dirección
+        addressData.direccion = addressData.direccion.trim();
+
+        // Actualizar el formulario
         setFormData(prev => ({
           ...prev,
           ...addressData
         }));
       });
+
+      // Prevenir el envío del formulario al presionar Enter en el campo de dirección
+      addressInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+        }
+      });
+
+    } catch (error) {
+      console.error('Error al inicializar el autocompletado:', error);
     }
   };
 

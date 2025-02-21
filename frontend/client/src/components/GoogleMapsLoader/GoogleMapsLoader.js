@@ -1,24 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
-const GoogleMapsLoader = ({ children }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-
+const GoogleMapsLoader = ({ children, onLoad }) => {
   useEffect(() => {
-    if (!window.google) {
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}&libraries=places`;
-      script.async = true;
-      script.defer = true;
-      script.onload = () => setIsLoaded(true);
-      document.head.appendChild(script);
-    } else {
-      setIsLoaded(true);
+    // Verificar si Google Maps ya está cargado
+    if (window.google && window.google.maps) {
+      onLoad && onLoad();
+      return;
     }
-  }, []);
 
-  if (!isLoaded) return <div>Cargando mapa...</div>;
+    // Cargar el script de Google Maps
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => onLoad && onLoad();
+    
+    document.head.appendChild(script);
 
-  return children;
+    return () => {
+      // Limpiar el script al desmontar
+      document.head.removeChild(script);
+    };
+  }, [onLoad]);
+
+  return <>{children}</>;
 };
 
 export default GoogleMapsLoader; 
