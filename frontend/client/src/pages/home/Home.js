@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import GoogleMapsLoader from '../../components/GoogleMapsLoader/GoogleMapsLoader';
 import Map from '../../components/Map/Map';
 import RouteSearch from '../../components/RouteSearch/RouteSearch';
@@ -8,7 +9,6 @@ import ReportCreator from '../../components/ReportCreator/ReportCreator';
 import NewsCarousel from '../../components/NewsCarousel/NewsCarousel';
 import FavoriteRoutes from '../../components/FavoriteRoutes/FavoriteRoutes';
 import './Home.css';
-import { useAuth } from '../../context/AuthContext';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ const Home = () => {
   const [activeReports, setActiveReports] = useState([]);
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [mapInstance, setMapInstance] = useState(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -57,8 +58,39 @@ const Home = () => {
     }
   };
 
-  const handleRouteSelect = (route) => {
-    setSelectedRoute(route);
+  const handleRouteSelect = (routeData) => {
+    setSelectedRoute(routeData);
+    if (mapInstance) {
+      // Limpiar rutas anteriores
+      if (window.currentDirectionsRenderer) {
+        window.currentDirectionsRenderer.setMap(null);
+      }
+
+      const directionsRenderer = new window.google.maps.DirectionsRenderer({
+        map: mapInstance,
+        suppressMarkers: false,
+        polylineOptions: {
+          strokeColor: '#2196F3',
+          strokeWeight: 6,
+          strokeOpacity: 0.8
+        }
+      });
+
+      window.currentDirectionsRenderer = directionsRenderer;
+
+      if (routeData.selectedRouteIndex !== undefined) {
+        directionsRenderer.setRouteIndex(routeData.selectedRouteIndex);
+      }
+
+      directionsRenderer.setDirections({
+        routes: routeData.routes,
+        request: {
+          origin: routeData.origin,
+          destination: routeData.destination,
+          travelMode: window.google.maps.TravelMode.DRIVING
+        }
+      });
+    }
   };
 
   if (loading) {
@@ -74,23 +106,24 @@ const Home = () => {
       <div className="main-content">
         <div className="map-section">
           <GoogleMapsLoader>
-            <Map 
+            <Map
               userLocation={userLocation}
               selectedRoute={selectedRoute}
               activeReports={activeReports}
+              onMapLoad={setMapInstance}
+            />
+            <RouteSearch
+              userLocation={userLocation}
+              onRouteSelect={handleRouteSelect}
             />
           </GoogleMapsLoader>
-          <RouteSearch 
-            userLocation={userLocation}
-            onRouteSelect={setSelectedRoute}
-          />
         </div>
         
         <div className="side-content">
           <NewsCarousel reports={activeReports} />
           
           {userData && userData.rol_id !== 5 && (
-            <ReportCreator 
+            <ReportCreator
               userLocation={userLocation}
               onReportCreated={(report) => {
                 setActiveReports([...activeReports, report]);
@@ -98,7 +131,7 @@ const Home = () => {
             />
           )}
           
-          <ReportsList 
+          <ReportsList
             reports={activeReports}
             userLocation={userLocation}
           />

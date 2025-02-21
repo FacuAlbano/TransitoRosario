@@ -1,52 +1,24 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const GoogleMapsLoader = ({ children, onLoad }) => {
+const GoogleMapsLoader = ({ children }) => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [googleInstance, setGoogleInstance] = useState(null);
-  const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
 
   useEffect(() => {
-    if (window.google) {
-      setIsLoaded(true);
-      setGoogleInstance(window.google);
-      if (onLoad) onLoad(window.google);
-      return;
-    }
-
-    const loadGoogleMaps = () => {
-      if (document.querySelector('script[src*="maps.googleapis.com/maps/api"]')) {
-        return;
-      }
-
+    if (!window.google) {
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places,geometry`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}&libraries=places`;
       script.async = true;
       script.defer = true;
-      
-      script.onload = () => {
-        setIsLoaded(true);
-        setGoogleInstance(window.google);
-        if (onLoad) onLoad(window.google);
-      };
-
+      script.onload = () => setIsLoaded(true);
       document.head.appendChild(script);
-    };
-
-    loadGoogleMaps();
-  }, [GOOGLE_MAPS_API_KEY, onLoad]);
-
-  if (!isLoaded || !googleInstance) {
-    return <div>Cargando Google Maps...</div>;
-  }
-
-  // Clonar los children y pasarles google como prop
-  return React.Children.map(children, child => {
-    if (React.isValidElement(child)) {
-      return React.cloneElement(child, { google: googleInstance });
+    } else {
+      setIsLoaded(true);
     }
-    return child;
-  });
+  }, []);
+
+  if (!isLoaded) return <div>Cargando mapa...</div>;
+
+  return children;
 };
 
 export default GoogleMapsLoader; 

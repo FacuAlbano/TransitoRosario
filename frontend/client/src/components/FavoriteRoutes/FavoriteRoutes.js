@@ -1,45 +1,41 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaStar, FaTrash, FaRoute, FaSearch } from 'react-icons/fa';
 import './FavoriteRoutes.css';
 
-const FavoriteRoutes = ({ userData, onRouteSelect }) => {
-  const [favorites, setFavorites] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+const FavoriteRoutes = ({ onRouteSelect }) => {
+  const [favoriteRoutes, setFavoriteRoutes] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!userData) return;
-    loadFavorites();
-  }, [userData]);
+    fetchFavoriteRoutes();
+  }, []);
 
-  const loadFavorites = async () => {
+  const fetchFavoriteRoutes = async () => {
     try {
+      setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/routes/favorites', {
+      const response = await fetch('http://localhost:5000/api/routes/favorite', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setFavorites(data);
-      } else {
-        throw new Error('Error cargando favoritos');
+        const routes = await response.json();
+        setFavoriteRoutes(routes);
       }
     } catch (error) {
-      setError('Error al cargar las rutas favoritas');
+      console.error('Error al cargar rutas favoritas:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDeleteRoute = async (routeId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/routes/favorites/${id}`, {
+      const response = await fetch(`http://localhost:5000/api/routes/favorite/${routeId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -47,45 +43,34 @@ const FavoriteRoutes = ({ userData, onRouteSelect }) => {
       });
 
       if (response.ok) {
-        setFavorites(favorites.filter(fav => fav.id !== id));
-      } else {
-        throw new Error('Error eliminando favorito');
+        fetchFavoriteRoutes();
       }
     } catch (error) {
-      setError('Error al eliminar la ruta favorita');
+      console.error('Error al eliminar ruta:', error);
     }
   };
 
-  const handleSelect = (favorite) => {
+  const handleRouteClick = (route) => {
+    const routeData = JSON.parse(route.routeData);
     onRouteSelect({
-      origin: favorite.origen,
-      destination: favorite.destino
+      origin: routeData.legs[0].start_location,
+      destination: routeData.legs[0].end_location,
+      routes: [routeData],
+      selectedRouteIndex: 0
     });
   };
 
-  const filteredFavorites = favorites.filter(fav => 
-    fav.origen.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    fav.destino.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredRoutes = favoriteRoutes.filter(route =>
+    route.origin.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    route.destination.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  if (loading) {
-    return (
-      <div className="favorite-routes loading">
-        <div className="loading-spinner"></div>
-      </div>
-    );
-  }
-
-  if (!userData) {
-    return null;
-  }
 
   return (
     <div className="favorite-routes">
       <div className="favorite-routes-header">
         <h3><FaStar /> Rutas Favoritas</h3>
         <div className="search-box">
-          <FaSearch />
+          <FaSearch className="search-icon" />
           <input
             type="text"
             placeholder="Buscar ruta..."
@@ -95,41 +80,35 @@ const FavoriteRoutes = ({ userData, onRouteSelect }) => {
         </div>
       </div>
 
-      {error && (
-        <div className="error-message">
-          {error}
+      {loading ? (
+        <div className="loading-spinner">
+          <div className="spinner"></div>
         </div>
-      )}
-
-      {filteredFavorites.length === 0 ? (
-        <div className="no-favorites">
-          <FaRoute />
+      ) : filteredRoutes.length === 0 ? (
+        <div className="no-routes">
+          <FaRoute className="empty-icon" />
           <p>{searchTerm ? 'No se encontraron rutas' : 'No hay rutas favoritas'}</p>
         </div>
       ) : (
-        <div className="favorites-list">
-          {filteredFavorites.map((favorite) => (
-            <div key={favorite.id} className="favorite-route-card">
-              <div className="route-info" onClick={() => handleSelect(favorite)}>
-                <div className="route-points">
-                  <div className="origin">
-                    <span className="label">Desde:</span>
-                    <span className="value">{favorite.origen}</span>
+        <div className="routes-list">
+          {filteredRoutes.map((route) => (
+            <div key={route.id} className="route-item">
+              <div className="route-content" onClick={() => handleRouteClick(route)}>
+                <div className="route-details">
+                  <div className="route-endpoints">
+                    <span className="origin">{route.origin}</span>
+                    <span className="separator">→</span>
+                    <span className="destination">{route.destination}</span>
                   </div>
-                  <div className="destination">
-                    <span className="label">Hasta:</span>
-                    <span className="value">{favorite.destino}</span>
+                  <div className="route-meta">
+                    <span className="duration">{route.duration}</span>
+                    <span className="distance">{route.distance}</span>
                   </div>
-                </div>
-                <div className="route-meta">
-                  <span className="date">
-                    {new Date(favorite.fecha_creacion).toLocaleDateString()}
-                  </span>
                 </div>
               </div>
               <button
                 className="delete-button"
-                onClick={() => handleDelete(favorite.id)}
+                onClick={() => handleDeleteRoute(route.id)}
                 title="Eliminar ruta"
               >
                 <FaTrash />

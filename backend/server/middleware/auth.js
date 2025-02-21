@@ -1,49 +1,36 @@
 const jwt = require('jsonwebtoken');
-const db = require('../config/db');
+const pool = require('../config/db');
 
 const auth = async (req, res, next) => {
   try {
-    const authHeader = req.header('Authorization');
-    
-    if (!authHeader) {
-      return res.status(401).json({ message: 'No hay token de autenticación' });
+    if (!req.headers.authorization) {
+      return res.status(401).json({ error: 'No se proporcionó token de autenticación' });
     }
 
-    const token = authHeader.replace('Bearer ', '');
-    
-    try {
-      const decoded = jwt.verify(token, 'tu_secret_key');
-      console.log('Token decodificado:', decoded); // Para debugging
+    const token = req.headers.authorization.split(' ')[1];
+    const decoded = jwt.verify(token, 'tu_secret_key'); // Usa la misma clave que usaste al crear el token
 
-      const [users] = await db.execute(
-        'SELECT id, usuario FROM usuarios WHERE id = ?',
-        [decoded.id]
-      );
+    const [users] = await pool.query(
+      'SELECT id, usuario FROM usuarios WHERE id = ?',
+      [decoded.id]
+    );
 
-      console.log('Usuario encontrado:', users[0]); // Para debugging
-
-      if (!users || users.length === 0) {
-        return res.status(401).json({ message: 'Usuario no encontrado' });
-      }
-
-      req.user = {
-        id: users[0].id,
-        usuario: users[0].usuario
-      };
-      
-      next();
-    } catch (error) {
-      if (error.name === 'JsonWebTokenError') {
-        return res.status(401).json({ message: 'Token inválido' });
-      }
-      if (error.name === 'TokenExpiredError') {
-        return res.status(401).json({ message: 'Token expirado' });
-      }
-      throw error;
+    if (!users || users.length === 0) {
+      return res.status(401).json({ error: 'Usuario no encontrado' });
     }
+
+    req.user = {
+      id: users[0].id,
+      usuario: users[0].usuario
+    };
+    
+    next();
   } catch (error) {
-    console.error('Error en autenticación:', error);
-    res.status(500).json({ message: 'Error del servidor' });
+    console.error('Error de autenticación:', error);
+    return res.status(401).json({ 
+      error: 'Token inválido o expirado',
+      details: error.message 
+    });
   }
 };
 

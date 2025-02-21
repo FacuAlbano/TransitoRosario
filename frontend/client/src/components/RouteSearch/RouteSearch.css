@@ -4,14 +4,18 @@
   backdrop-filter: blur(10px);
   padding: 15px;
   border-radius: 10px;
-  margin-bottom: 20px;
+}
+
+.route-search form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .search-inputs {
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-bottom: 15px;
+  gap: 12px;
 }
 
 .input-group {
@@ -24,15 +28,22 @@
 .input-group input {
   width: 100%;
   padding: 10px 35px;
+  background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 5px;
-  background: rgba(255, 255, 255, 0.1);
   color: white;
   font-size: 0.9em;
+  transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #03e9f4;
+  box-shadow: 0 0 10px rgba(3, 233, 244, 0.2);
 }
 
 .input-group input::placeholder {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .icon {
@@ -42,14 +53,21 @@
   font-size: 1em;
 }
 
-.use-location {
+.use-location,
+.clear-button {
   position: absolute;
   right: 8px;
   background: none;
   border: none;
-  color: #03e9f4;
+  color: rgba(255, 255, 255, 0.5);
   cursor: pointer;
   padding: 4px;
+  transition: all 0.3s ease;
+}
+
+.use-location:hover,
+.clear-button:hover {
+  color: #03e9f4;
 }
 
 .swap-button {
@@ -89,27 +107,34 @@
   box-shadow: 0 5px 15px rgba(3, 233, 244, 0.3);
 }
 
-/* Estilos para los resultados del autocompletado de Google */
+/* Estilos para el autocompletado de Google */
 .pac-container {
-  background: rgba(30, 30, 30, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 5px;
+  background: rgba(30, 30, 30, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 5px !important;
   margin-top: 5px;
   font-size: 0.9em;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
 }
 
 .pac-item {
-  padding: 8px 10px;
-  color: white;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 10px !important;
+  color: white !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  cursor: pointer;
 }
 
 .pac-item:hover {
-  background: rgba(3, 233, 244, 0.1);
+  background: rgba(3, 233, 244, 0.1) !important;
 }
 
 .pac-item-query {
-  color: #03e9f4;
+  color: #03e9f4 !important;
+}
+
+.pac-matched {
+  color: #03e9f4 !important;
+  font-weight: bold;
 }
 
 .favorite-button {
@@ -170,9 +195,76 @@
 
   .swap-button {
     transform: rotate(90deg);
+    margin: 5px 0;
   }
 
   .swap-button:hover {
     transform: rotate(270deg);
   }
+}
+
+.route-options {
+  margin-top: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 15px;
+}
+
+.route-options h3 {
+  color: #03e9f4;
+  margin-bottom: 10px;
+  font-size: 1em;
+}
+
+.route-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.route-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.route-option.selected {
+  background: rgba(3, 233, 244, 0.1);
+  border: 1px solid #03e9f4;
+}
+
+.route-info {
+  display: flex;
+  gap: 15px;
+  color: white;
+}
+
+.route-duration {
+  font-weight: bold;
+}
+
+.route-distance {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.save-route-button {
+  background: none;
+  border: 1px solid #03e9f4;
+  color: #03e9f4;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9em;
+  transition: all 0.3s ease;
+}
+
+.save-route-button:hover {
+  background: rgba(3, 233, 244, 0.1);
 } 

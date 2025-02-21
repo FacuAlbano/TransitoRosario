@@ -1,19 +1,18 @@
 import React, { useEffect, useRef } from 'react';
 import './Map.css';
 
-const Map = ({ google, userLocation, selectedRoute, activeReports }) => {
+const Map = ({ userLocation, selectedRoute, activeReports, onMapLoad }) => {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const markersRef = useRef([]);
 
-  // Inicializar el mapa
   useEffect(() => {
-    if (!google || !mapRef.current) return;
+    if (!window.google || !mapRef.current) return;
 
     const defaultLocation = { lat: -32.9595, lng: -60.6393 }; // Rosario
     const location = userLocation || defaultLocation;
 
-    mapInstance.current = new google.maps.Map(mapRef.current, {
+    const map = new window.google.maps.Map(mapRef.current, {
       center: location,
       zoom: 13,
       styles: mapStyles,
@@ -21,13 +20,16 @@ const Map = ({ google, userLocation, selectedRoute, activeReports }) => {
       fullscreenControl: false
     });
 
+    mapInstance.current = map;
+    if (onMapLoad) onMapLoad(map);
+
     // Marcador de ubicación del usuario
     if (userLocation) {
-      new google.maps.Marker({
+      new window.google.maps.Marker({
         position: userLocation,
-        map: mapInstance.current,
+        map: map,
         icon: {
-          path: google.maps.SymbolPath.CIRCLE,
+          path: window.google.maps.SymbolPath.CIRCLE,
           scale: 10,
           fillColor: '#03e9f4',
           fillOpacity: 0.7,
@@ -37,25 +39,25 @@ const Map = ({ google, userLocation, selectedRoute, activeReports }) => {
         title: 'Tu ubicación'
       });
     }
-  }, [google, userLocation]);
+  }, [userLocation, onMapLoad]);
 
   // Actualizar marcadores de reportes
   useEffect(() => {
-    if (!google || !mapInstance.current || !activeReports) return;
+    if (!mapInstance.current || !activeReports) return;
 
     // Limpiar marcadores anteriores
     markersRef.current.forEach(marker => marker.setMap(null));
     markersRef.current = [];
 
     activeReports.forEach(report => {
-      const marker = new google.maps.Marker({
+      const marker = new window.google.maps.Marker({
         position: { lat: report.latitud, lng: report.longitud },
         map: mapInstance.current,
         icon: getReportIcon(report.tipo),
-        animation: google.maps.Animation.DROP
+        animation: window.google.maps.Animation.DROP
       });
 
-      const infoWindow = new google.maps.InfoWindow({
+      const infoWindow = new window.google.maps.InfoWindow({
         content: createInfoWindowContent(report)
       });
 
@@ -65,12 +67,12 @@ const Map = ({ google, userLocation, selectedRoute, activeReports }) => {
 
       markersRef.current.push(marker);
     });
-  }, [google, activeReports]);
+  }, [activeReports]);
 
   const getReportIcon = (type) => {
     const icons = {
       1: { // Accidente
-        path: google.maps.SymbolPath.CIRCLE,
+        path: window.google.maps.SymbolPath.CIRCLE,
         fillColor: '#ff4444',
         fillOpacity: 0.7,
         strokeColor: '#ff4444',
@@ -97,23 +99,49 @@ const Map = ({ google, userLocation, selectedRoute, activeReports }) => {
 
   // Mostrar ruta seleccionada
   useEffect(() => {
-    if (!google || !mapInstance.current || !selectedRoute) return;
+    if (!window.google || !mapInstance.current || !selectedRoute) return;
 
-    const directionsService = new google.maps.DirectionsService();
-    const directionsRenderer = new google.maps.DirectionsRenderer({
-      map: mapInstance.current
+    // Limpiar rutas anteriores si existen
+    if (window.currentDirectionsRenderer) {
+      window.currentDirectionsRenderer.setMap(null);
+    }
+
+    const directionsService = new window.google.maps.DirectionsService();
+    const directionsRenderer = new window.google.maps.DirectionsRenderer({
+      map: mapInstance.current,
+      suppressMarkers: false,
+      polylineOptions: {
+        strokeColor: '#2196F3',
+        strokeWeight: 6,
+        strokeOpacity: 0.8
+      }
     });
+
+    window.currentDirectionsRenderer = directionsRenderer;
 
     directionsService.route({
       origin: selectedRoute.origin,
       destination: selectedRoute.destination,
-      travelMode: google.maps.TravelMode.DRIVING
+      travelMode: window.google.maps.TravelMode.DRIVING,
+      provideRouteAlternatives: true,
+      optimizeWaypoints: true
     }, (response, status) => {
       if (status === 'OK') {
         directionsRenderer.setDirections(response);
+        
+        // Ajustar el zoom para ver toda la ruta
+        const bounds = new window.google.maps.LatLngBounds();
+        response.routes[0].legs.forEach(leg => {
+          leg.steps.forEach(step => {
+            step.path.forEach(point => {
+              bounds.extend(point);
+            });
+          });
+        });
+        mapInstance.current.fitBounds(bounds);
       }
     });
-  }, [google, selectedRoute]);
+  }, [selectedRoute]);
 
   return <div ref={mapRef} className="map-container" />;
 };
