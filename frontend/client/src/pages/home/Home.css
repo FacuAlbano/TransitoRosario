@@ -1,55 +1,148 @@
 .home-container {
-  min-height: calc(100vh - 60px); /* Ajustar según altura del navbar */
+  min-height: calc(100vh - 60px);
+  padding: 15px;
   background: linear-gradient(120deg, #2980b9, #8e44ad);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  animation: fadeIn 0.5s ease-in-out;
 }
 
 .main-content {
   display: flex;
-  gap: 20px;
-  height: calc(100vh - 100px);
+  gap: 15px;
+  max-width: 1400px;
+  margin: 0 auto;
+  height: calc(100vh - 90px);
 }
 
 .map-section {
-  flex: 2;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 15px;
-  padding: 20px;
+  flex: 3;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  gap: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 15px;
+  backdrop-filter: blur(10px);
+  height: 100%;
 }
 
 .side-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-width: 400px;
+  gap: 15px;
+  max-width: 350px;
+  height: 100%;
+}
+
+/* Ajustes para los componentes dentro de side-content */
+.report-creator {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 15px;
+  max-height: 30%;
+}
+
+.report-creator form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.report-creator select,
+.report-creator textarea {
+  padding: 8px;
+  font-size: 0.9em;
+}
+
+.report-creator textarea {
+  height: 60px;
+  resize: none;
+}
+
+.reports-list {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 15px;
+  max-height: 35%;
+  overflow-y: auto;
+}
+
+.favorite-routes {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 15px;
+  max-height: 35%;
+  overflow-y: auto;
+}
+
+/* Ajustes para el mapa */
+.map-container {
+  flex: 1;
+  min-height: 0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* Ajustes para el buscador de rutas */
+.route-search {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 12px;
+  border-radius: 10px;
+  min-height: 85px;
+}
+
+/* Scrollbars personalizados */
+.side-content *::-webkit-scrollbar {
+  width: 6px;
+}
+
+.side-content *::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.side-content *::-webkit-scrollbar-thumb {
+  background: rgba(3, 233, 244, 0.3);
+  border-radius: 3px;
+}
+
+.side-content *::-webkit-scrollbar-thumb:hover {
+  background: rgba(3, 233, 244, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .main-content {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .side-content {
+    max-width: 100%;
+  }
+
+  .map-section {
+    height: 500px;
+  }
+
+  .report-creator,
+  .reports-list,
+  .favorite-routes {
+    max-height: none;
+  }
 }
 
 .loading {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  color: white;
+  min-height: calc(100vh - 60px);
   font-size: 1.5em;
-}
-
-@media (max-width: 1024px) {
-  .main-content {
-    flex-direction: column;
-  }
-
-  .side-content {
-    max-width: 100%;
-  }
+  color: white;
 }
 
 /* Animaciones */
@@ -61,5 +154,19 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+.home-page {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 60px); /* Ajusta según la altura de tu navbar */
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .route-search {
+    width: 95%;
+    top: 10px;
   }
 }

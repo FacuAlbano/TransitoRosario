@@ -1,3 +1,106 @@
+.user-profile {
+  min-height: calc(100vh - 60px);
+  padding: 20px;
+  background: linear-gradient(120deg, #2980b9, #8e44ad);
+}
+
+.profile-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.info-section {
+  margin: 20px 0;
+}
+
+.info-row {
+  display: flex;
+  margin: 15px 0;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.info-row label {
+  flex: 1;
+  color: #03e9f4;
+  font-weight: bold;
+}
+
+.info-row span {
+  flex: 2;
+  color: white;
+}
+
+.change-password-button {
+  background: #03e9f4;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.change-password-button:hover {
+  background: #0bc2cf;
+  transform: translateY(-2px);
+}
+
+.password-form {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  position: relative;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  color: white;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #03e9f4;
+  cursor: pointer;
+}
+
+.save-button {
+  background: #03e9f4;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.save-button:hover {
+  background: #0bc2cf;
+}
+
 .user-page {
   min-height: 100vh;
   display: flex;
@@ -80,102 +183,6 @@
 .info-item span {
   font-size: 1.1em;
   padding: 5px 0;
-}
-
-.password-section {
-  margin-top: 20px;
-}
-
-.change-password-button {
-  background: none;
-  border: 2px solid #03e9f4;
-  color: #03e9f4;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1em;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: all 0.3s ease;
-}
-
-.change-password-button:hover {
-  background: #03e9f4;
-  color: white;
-  box-shadow: 0 0 10px rgba(3, 233, 244, 0.5);
-}
-
-.password-form {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.form-group {
-  position: relative;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: 5px;
-  color: white;
-  font-size: 1em;
-  transition: all 0.3s ease;
-}
-
-.form-group input:focus {
-  outline: none;
-  box-shadow: 0 0 10px rgba(3, 233, 244, 0.5);
-}
-
-.form-group input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.toggle-password {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: #03e9f4;
-  cursor: pointer;
-  padding: 5px;
-  display: flex;
-  align-items: center;
-  transition: all 0.3s ease;
-}
-
-.toggle-password:hover {
-  color: white;
-}
-
-.save-button {
-  background: #03e9f4;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  transition: all 0.3s ease;
-  margin-top: 10px;
-}
-
-.save-button:hover {
-  background: #02c4cd;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(3, 233, 244, 0.3);
 }
 
 .loading {

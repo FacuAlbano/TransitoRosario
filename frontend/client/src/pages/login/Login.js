@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import './Login.css';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     userOrEmail: '',
     password: ''
@@ -25,24 +28,19 @@ const Login = () => {
     try {
       const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // Guardar el token en localStorage
-        localStorage.setItem('token', data.token);
-        // Redirigir al usuario
+        await login(data.user, data.token);
         navigate('/');
       } else {
         setError(data.message || 'Error al iniciar sesión');
       }
     } catch (error) {
-      console.error('Error:', error);
       setError('Error de conexión');
     }
   };

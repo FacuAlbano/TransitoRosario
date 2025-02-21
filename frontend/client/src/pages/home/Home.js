@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import GoogleMapsLoader from '../../components/GoogleMapsLoader/GoogleMapsLoader';
 import Map from '../../components/Map/Map';
 import RouteSearch from '../../components/RouteSearch/RouteSearch';
 import ReportsList from '../../components/ReportsList/ReportsList';
@@ -7,49 +8,23 @@ import ReportCreator from '../../components/ReportCreator/ReportCreator';
 import NewsCarousel from '../../components/NewsCarousel/NewsCarousel';
 import FavoriteRoutes from '../../components/FavoriteRoutes/FavoriteRoutes';
 import './Home.css';
+import { useAuth } from '../../context/AuthContext';
 
 const Home = () => {
   const navigate = useNavigate();
+  const { userData, isAuthenticated } = useAuth();
   const [userLocation, setUserLocation] = useState(null);
-  const [userData, setUserData] = useState(null);
   const [activeReports, setActiveReports] = useState([]);
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkAuth();
-    requestLocation();
-  }, []);
-
-  const checkAuth = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    if (!isAuthenticated) {
       navigate('/login');
       return;
     }
 
-    try {
-      const response = await fetch('http://localhost:5000/api/auth/verify', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUserData(data.user);
-      } else {
-        navigate('/login');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      navigate('/login');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const requestLocation = () => {
+    // Obtener ubicación del usuario
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -60,24 +35,51 @@ const Home = () => {
         },
         (error) => {
           console.error('Error obteniendo ubicación:', error);
+          setUserLocation({ lat: -32.9595, lng: -60.6393 }); // Rosario por defecto
         }
       );
     }
+
+    // Cargar reportes activos
+    fetchActiveReports();
+    setLoading(false);
+  }, [isAuthenticated, navigate]);
+
+  const fetchActiveReports = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/reports/active');
+      if (response.ok) {
+        const data = await response.json();
+        setActiveReports(data);
+      }
+    } catch (error) {
+      console.error('Error al cargar reportes:', error);
+    }
+  };
+
+  const handleRouteSelect = (route) => {
+    setSelectedRoute(route);
   };
 
   if (loading) {
     return <div className="loading">Cargando...</div>;
   }
 
+  if (!userData) {
+    return null;
+  }
+
   return (
     <div className="home-container">
       <div className="main-content">
         <div className="map-section">
-          <Map 
-            userLocation={userLocation}
-            selectedRoute={selectedRoute}
-            activeReports={activeReports}
-          />
+          <GoogleMapsLoader>
+            <Map 
+              userLocation={userLocation}
+              selectedRoute={selectedRoute}
+              activeReports={activeReports}
+            />
+          </GoogleMapsLoader>
           <RouteSearch 
             userLocation={userLocation}
             onRouteSelect={setSelectedRoute}
@@ -87,10 +89,9 @@ const Home = () => {
         <div className="side-content">
           <NewsCarousel reports={activeReports} />
           
-          {userData && userData.rol_id !== 5 && ( // No mostrar para menores de 16
+          {userData && userData.rol_id !== 5 && (
             <ReportCreator 
               userLocation={userLocation}
-              userData={userData}
               onReportCreated={(report) => {
                 setActiveReports([...activeReports, report]);
               }}

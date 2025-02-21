@@ -30,3 +30,6 @@ yarn-error.log*
 # Ignorar node_modules en el frontend
 /frontend/client/node_modules/
 
+/frontend/client/src/.env
+/backend/server/.env    
+

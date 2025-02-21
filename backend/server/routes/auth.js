@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
+const auth = require('../middleware/auth');
 
 // Registro de usuario
 router.post('/register', async (req, res) => {
@@ -86,9 +87,10 @@ function calcularEdad(fechaNacimiento) {
 router.post('/login', async (req, res) => {
   try {
     const { userOrEmail, password } = req.body;
+    console.log('Intento de login para:', userOrEmail);
 
     const [users] = await db.execute(
-      `SELECT u.*, r.nombre as rol_nombre 
+      `SELECT u.*, r.nombre as rol 
        FROM usuarios u 
        JOIN roles r ON u.rol_id = r.id 
        WHERE u.email = ? OR u.usuario = ?`,
@@ -106,52 +108,72 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Credenciales inválidas' });
     }
 
+    const userData = {
+      id: user.id,
+      nombre: user.nombre,
+      apellido: user.apellido,
+      email: user.email,
+      usuario: user.usuario,
+      rol_id: user.rol_id,
+      rol: user.rol
+    };
+
     const token = jwt.sign(
-      { 
-        id: user.id, 
-        usuario: user.usuario,
-        rol: user.rol_nombre 
-      },
+      { id: user.id },
       'tu_secret_key',
       { expiresIn: '24h' }
     );
 
-    const expiracion = new Date();
-    expiracion.setHours(expiracion.getHours() + 24);
-
-    await db.execute(
-      'INSERT INTO sesiones (usuario_id, token, fecha_expiracion) VALUES (?, ?, ?)',
-      [user.id, token, expiracion]
-    );
-
-    res.json({ token });
+    console.log('Login exitoso para usuario:', userData.usuario);
+    res.json({ 
+      user: userData,
+      token 
+    });
   } catch (error) {
+    console.error('Error en login:', error);
     res.status(500).json({ message: 'Error al iniciar sesión' });
   }
 });
 
-// Verificar sesión
-router.get('/verify', async (req, res) => {
+// Verificar token y obtener datos del usuario
+router.get('/verify', auth, async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    console.log('Verificando usuario con ID:', req.user.id);
 
-    if (!token) {
-      return res.status(401).json({ message: 'No autorizado' });
-    }
-
-    const [sesiones] = await db.execute(
-      'SELECT * FROM sesiones WHERE token = ? AND fecha_expiracion > NOW()',
-      [token]
+    const [rows] = await db.execute(
+      `SELECT u.id, u.nombre, u.apellido, u.email, u.usuario, u.rol_id, r.nombre as rol 
+       FROM usuarios u 
+       LEFT JOIN roles r ON u.rol_id = r.id 
+       WHERE u.id = ?`,
+      [req.user.id]
     );
 
-    if (sesiones.length === 0) {
-      return res.status(401).json({ message: 'Sesión expirada' });
+    console.log('Resultado de la consulta:', rows);
+
+    if (!rows || rows.length === 0) {
+      console.log('Usuario no encontrado en la base de datos');
+      return res.status(404).json({ message: 'Usuario no encontrado' });
     }
 
-    const decoded = jwt.verify(token, 'tu_secret_key');
-    res.json({ user: decoded });
+    const userData = {
+      id: rows[0].id,
+      nombre: rows[0].nombre,
+      apellido: rows[0].apellido,
+      email: rows[0].email,
+      usuario: rows[0].usuario,
+      rol_id: rows[0].rol_id,
+      rol: rows[0].rol || 'usuario'
+    };
+
+    console.log('Enviando datos del usuario:', userData);
+    res.json({ user: userData });
   } catch (error) {
-    res.status(401).json({ message: 'Token inválido' });
+    console.error('Error en verify:', error);
+    res.status(500).json({ 
+      message: 'Error del servidor',
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 

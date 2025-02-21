@@ -1,31 +1,52 @@
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 
-const GoogleMapsLoader = ({ onLoad, children }) => {
+const GoogleMapsLoader = ({ children, onLoad }) => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const GOOGLE_MAPS_API_KEY = 'AIzaSyB__T70Nbx-i_jyz2awR8zjYN7NsXOgYx0';
+  const [googleInstance, setGoogleInstance] = useState(null);
+  const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
 
   useEffect(() => {
-    if (!window.google) {
+    if (window.google) {
+      setIsLoaded(true);
+      setGoogleInstance(window.google);
+      if (onLoad) onLoad(window.google);
+      return;
+    }
+
+    const loadGoogleMaps = () => {
+      if (document.querySelector('script[src*="maps.googleapis.com/maps/api"]')) {
+        return;
+      }
+
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places,geometry`;
       script.async = true;
       script.defer = true;
+      
       script.onload = () => {
         setIsLoaded(true);
-        if (onLoad) onLoad();
+        setGoogleInstance(window.google);
+        if (onLoad) onLoad(window.google);
       };
-      document.head.appendChild(script);
-    } else {
-      setIsLoaded(true);
-      if (onLoad) onLoad();
-    }
-  }, [onLoad]);
 
-  if (!isLoaded) {
-    return <div>Cargando mapa...</div>;
+      document.head.appendChild(script);
+    };
+
+    loadGoogleMaps();
+  }, [GOOGLE_MAPS_API_KEY, onLoad]);
+
+  if (!isLoaded || !googleInstance) {
+    return <div>Cargando Google Maps...</div>;
   }
 
-  return children;
+  // Clonar los children y pasarles google como prop
+  return React.Children.map(children, child => {
+    if (React.isValidElement(child)) {
+      return React.cloneElement(child, { google: googleInstance });
+    }
+    return child;
+  });
 };
 
 export default GoogleMapsLoader; 
