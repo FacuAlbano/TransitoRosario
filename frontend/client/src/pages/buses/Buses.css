@@ -26,6 +26,7 @@
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
     padding: 20px;
+    margin-bottom: 100px;
   }
   
   .linea-card {
@@ -37,11 +38,13 @@
     transition: all 0.3s ease;
     position: relative;
     cursor: pointer;
+    z-index: 1;
   }
   
   .linea-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    z-index: 2;
   }
   
   .linea-card h2 {
@@ -71,21 +74,29 @@
   
   .linea-info {
     position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
     background: rgba(41, 128, 185, 0.95);
-    padding: 20px;
-    border-radius: 0 0 15px 15px;
-    z-index: 10;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    animation: slideDown 0.3s ease-out;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    z-index: 3;
+    animation: fadeIn 0.3s ease-out;
   }
   
-  @keyframes slideDown {
+  .linea-card:hover .linea-info {
+    top: calc(100% + 10px);
+    left: 0;
+  }
+  
+  .linea-card:nth-last-child(-n+6):hover .linea-info {
+    bottom: calc(100% + 10px);
+    top: auto;
+  }
+  
+  @keyframes fadeIn {
     from {
       opacity: 0;
-      transform: translateY(-10px);
+      transform: translateY(10px);
     }
     to {
       opacity: 1;
@@ -94,7 +105,11 @@
   }
   
   .info-section {
+    position: relative;
     margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(41, 128, 185, 0.85);
+    clear: both;
   }
   
   .info-section:last-child {
@@ -131,6 +146,13 @@
     color: #03e9f4;
   }
   
+  @media (max-width: 1200px) {
+    .linea-card:nth-last-child(-n+3):hover .linea-info {
+      bottom: calc(100% + 10px);
+      top: auto;
+    }
+  }
+  
   @media (max-width: 768px) {
     .colectivos-content h1 {
       font-size: 2rem;
@@ -138,6 +160,7 @@
   
     .lineas-grid {
       grid-template-columns: 1fr;
+      margin-bottom: 50px;
     }
   
     .linea-card {
@@ -148,10 +171,20 @@
       font-size: 1.5rem;
     }
   
+    .linea-card:nth-last-child(-n+2):hover .linea-info {
+      bottom: calc(100% + 10px);
+      top: auto;
+    }
+  
     .linea-info {
-      position: relative;
-      margin-top: 20px;
-      border-radius: 10px;
+      position: fixed;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      bottom: auto;
     }
   }
   
