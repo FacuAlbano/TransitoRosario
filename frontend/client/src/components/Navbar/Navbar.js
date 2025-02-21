@@ -11,7 +11,7 @@ const Navbar = () => {
             <a href="/Gallery">Galería</a>
             <a href="/About">Nosotros</a>
             <a href="/User">Usuario</a>
-            <a href="/Bus">Colectivos</a>
+            <a href="/Buses">Colectivos</a>
             <img src={logoRight} alt="Logo Derecha" className="nav-logo-right" />
         </nav>
     );

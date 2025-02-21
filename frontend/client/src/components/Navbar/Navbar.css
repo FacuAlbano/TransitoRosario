@@ -68,6 +68,14 @@
     transition: transform 0.3s ease, filter 0.3s ease;
 }
 
+.nav-logo-left {
+    margin-left: 0; /* Alinea la imagen a la izquierda */
+}
+
+.nav-logo-right {
+    margin-right: 0; /* Alinea la imagen a la derecha */
+}
+
 .nav-logo-left:hover,
 .nav-logo-right:hover {
     transform: scale(1.1);
