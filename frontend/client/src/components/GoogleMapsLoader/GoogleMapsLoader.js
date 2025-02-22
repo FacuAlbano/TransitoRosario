@@ -10,7 +10,7 @@ const GoogleMapsLoader = ({ children, onLoad }) => {
 
     // Cargar el script de Google Maps
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}&libraries=places&region=ar`;
     script.async = true;
     script.defer = true;
     script.onload = () => onLoad && onLoad();
@@ -19,7 +19,9 @@ const GoogleMapsLoader = ({ children, onLoad }) => {
 
     return () => {
       // Limpiar el script al desmontar
-      document.head.removeChild(script);
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
     };
   }, [onLoad]);
 

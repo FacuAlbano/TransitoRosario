@@ -12,40 +12,75 @@ const RouteSearch = ({ userLocation, onRouteSelect }) => {
   const [selectedRoute, setSelectedRoute] = useState(null);
 
   useEffect(() => {
-    if (!window.google) return;
+    // Asegurarse de que Google Maps esté cargado
+    if (!window.google || !window.google.maps) return;
 
     const initAutocomplete = () => {
-      const originInput = document.getElementById('origin-input');
-      const destInput = document.getElementById('destination-input');
+      try {
+        const originInput = document.getElementById('origin-input');
+        const destInput = document.getElementById('destination-input');
 
-      if (originInput && destInput) {
-        originAutocomplete.current = new window.google.maps.places.Autocomplete(originInput, {
-          componentRestrictions: { country: 'AR' },
-          fields: ['geometry', 'formatted_address']
-        });
+        if (originInput && destInput) {
+          // Configuración para Argentina
+          const options = {
+            componentRestrictions: { country: 'ar' },
+            types: ['geocode', 'establishment'],
+            fields: ['address_components', 'geometry', 'name']
+          };
 
-        destinationAutocomplete.current = new window.google.maps.places.Autocomplete(destInput, {
-          componentRestrictions: { country: 'AR' },
-          fields: ['geometry', 'formatted_address']
-        });
+          // Inicializar autocompletado para origen
+          originAutocomplete.current = new window.google.maps.places.Autocomplete(
+            originInput,
+            options
+          );
 
-        originAutocomplete.current.addListener('place_changed', () => {
-          const place = originAutocomplete.current.getPlace();
-          if (place.formatted_address) {
-            setOrigin(place.formatted_address);
-          }
-        });
+          // Inicializar autocompletado para destino
+          destinationAutocomplete.current = new window.google.maps.places.Autocomplete(
+            destInput,
+            options
+          );
 
-        destinationAutocomplete.current.addListener('place_changed', () => {
-          const place = destinationAutocomplete.current.getPlace();
-          if (place.formatted_address) {
-            setDestination(place.formatted_address);
-          }
-        });
+          // Manejar selección de lugar para origen
+          originAutocomplete.current.addListener('place_changed', () => {
+            const place = originAutocomplete.current.getPlace();
+            if (place.geometry) {
+              setOrigin(place.name || place.formatted_address);
+            }
+          });
+
+          // Manejar selección de lugar para destino
+          destinationAutocomplete.current.addListener('place_changed', () => {
+            const place = destinationAutocomplete.current.getPlace();
+            if (place.geometry) {
+              setDestination(place.name || place.formatted_address);
+            }
+          });
+
+          // Prevenir envío del formulario al presionar Enter
+          [originInput, destInput].forEach(input => {
+            input.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+              }
+            });
+          });
+        }
+      } catch (error) {
+        console.error('Error al inicializar autocompletado:', error);
       }
     };
 
     initAutocomplete();
+
+    // Cleanup
+    return () => {
+      if (originAutocomplete.current) {
+        window.google.maps.event.clearInstanceListeners(originAutocomplete.current);
+      }
+      if (destinationAutocomplete.current) {
+        window.google.maps.event.clearInstanceListeners(destinationAutocomplete.current);
+      }
+    };
   }, []);
 
   const handleSearch = async (e) => {
