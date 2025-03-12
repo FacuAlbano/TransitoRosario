@@ -18,7 +18,7 @@ const db = mysql.createConnection({
   port: 3307,
   user: 'root',
   password: 'falbano.106',
-  database: 'trro_db'
+  database: 'trro'
 });
 
 db.connect((err) => {

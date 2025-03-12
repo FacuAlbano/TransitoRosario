@@ -4,7 +4,7 @@ const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: 'falbano.106',
-  database: 'trro_db',
+  database: 'trro',
   port: 3307,
   waitForConnections: true,
   connectionLimit: 10,

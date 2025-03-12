@@ -1,6 +1,6 @@
 -- Crear la base de datos si no existe
-CREATE DATABASE IF NOT EXISTS trro_db;
-USE trro_db;
+CREATE DATABASE IF NOT EXISTS trro;
+USE trro;
 
 -- Crear tabla de roles
 CREATE TABLE IF NOT EXISTS roles (

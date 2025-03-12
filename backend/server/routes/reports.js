@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
+const db = require('../../database/db');
 
 // Agregar al inicio del archivo
 const cleanupExpiredReports = () => {
